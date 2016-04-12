@@ -1,2 +1,4 @@
-# Robot_2016_Ver2.0
-This is the revamped code for Shaker High School Robotics
+# Robot_2016
+Team 2791 2016 Robot Code
+
+This is the code for FRC Team 2791, Shaker Robotics
