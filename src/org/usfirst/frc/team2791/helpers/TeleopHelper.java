@@ -3,7 +3,7 @@ package org.usfirst.frc.team2791.helpers;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc.team2791.abstractSubsystems.OldAbstractShakershooterWheels.ShooterHeight;
-import org.usfirst.frc.team2791.commands.AutoLineUpShot;
+import org.usfirst.frc.team2791.commands.visionShot;
 import org.usfirst.frc.team2791.util.Toggle;
 
 import static org.usfirst.frc.team2791.robot.Robot.*;
@@ -74,7 +74,7 @@ public class TeleopHelper extends ShakerHelper {
 		if (driveTrain.isUsingPID() && Math.abs(driverJoystick.getGtaDriveLeft()) > 0.2) {
 			System.out.println("driver exiting PID");
 			driveTrain.doneUsingPID();
-			AutoLineUpShot.reset();
+			visionShot.reset();
 		}
 
 		// TODO: rework this method and the drive train methods to do PID in the
@@ -102,7 +102,7 @@ public class TeleopHelper extends ShakerHelper {
 			shooterWheels.setShooterSpeeds(0.6, false);
 			intake.pushBall();
 
-		} else if (!AutoLineUpShot.isRunning() && !shooterWheels.getIfAutoFire()) {
+		} else if (!visionShot.isRunning() && !shooterWheels.getIfAutoFire()) {
 			shooterWheels.setShooterSpeeds(operatorJoystick.getAxisRT() - operatorJoystick.getAxisLT(), false);
 			intake.stopMotors();
 		}
@@ -151,18 +151,18 @@ public class TeleopHelper extends ShakerHelper {
 			// previous cases apply
 			shooterWheels.resetServoAngle();
 
-		if (shooterWheels.getIfAutoFire() || AutoLineUpShot.isRunning())
+		if (shooterWheels.getIfAutoFire() || visionShot.isRunning())
 			compressor.stop();
 		else
 			compressor.start();
 
-		if ((operatorJoystick.getButtonLB() || driverJoystick.getDpadRight() || AutoLineUpShot.isRunning())
+		if ((operatorJoystick.getButtonLB() || driverJoystick.getDpadRight() || visionShot.isRunning())
 				&& !cameraLineUp) {
-			AutoLineUpShot.run();}
+			visionShot.run();}
 
 		if (operatorJoystick.getButtonSt()||operatorJoystick.getDpadDown()||driverJoystick.getButtonSel()) {
 			shooterWheels.resetShooterAutoStuff();
-			AutoLineUpShot.reset();
+			visionShot.reset();
 		}
 
 	}
@@ -192,14 +192,14 @@ public class TeleopHelper extends ShakerHelper {
 	public void configureAutoShot() {
 		// this is a driver auto line up without shooting
 		if (driverJoystick.getDpadLeft()) {
-			AutoLineUpShot.setUseMultipleFrames(false);
-			AutoLineUpShot.setShootAfterAligned(false);
-			AutoLineUpShot.run();
+			visionShot.setUseMultipleFrames(false);
+			visionShot.setShootAfterAligned(false);
+			visionShot.run();
 		}
 		if (operatorJoystick.getButtonLB() || driverJoystick.getDpadRight()) {
-			AutoLineUpShot.setUseMultipleFrames(true);
-			AutoLineUpShot.setShootAfterAligned(true);
-			AutoLineUpShot.run();
+			visionShot.setUseMultipleFrames(true);
+			visionShot.setShootAfterAligned(true);
+			visionShot.run();
 		}
 	}
 
@@ -208,7 +208,7 @@ public class TeleopHelper extends ShakerHelper {
 		driveTrain.disable();
 		shooterWheels.disable();
 		intake.disable();
-		AutoLineUpShot.reset();
+		visionShot.reset();
 	}
 
 	public void updateSmartDash() {

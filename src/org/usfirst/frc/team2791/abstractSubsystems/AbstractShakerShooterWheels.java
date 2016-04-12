@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc.team2791.util.Constants;
 
 import static org.usfirst.frc.team2791.robot.Robot.shooterArm;
+import static org.usfirst.frc.team2791.robot.Robot.shooterWheels;
 
 /**
  * Created by Akhil on 4/10/2016.
@@ -324,12 +325,17 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
     /*
      * Methods from ShakerSubsystem
      */
+    public void reset() {
+        shooterWheels.stopMotors();
+    }
+
     public void disable() {
         // disable code will stop motors
         stopMotors();
         completeShot = false;
         prepShot = false;
         cancelShot = false;
+        resetShooterFlags();
     }
 
     public void updateSmartDash() {

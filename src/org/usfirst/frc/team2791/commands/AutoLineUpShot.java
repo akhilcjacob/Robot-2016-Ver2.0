@@ -6,7 +6,8 @@ import org.usfirst.frc.team2791.util.ShakerCamera.ParticleReport;
 
 import static org.usfirst.frc.team2791.robot.Robot.*;
 
-public class AutoLineUpShot implements Runnable {
+public class AutoLineUpShot extends ShakerCommand implements Runnable {
+    private static final double angleMaxOutput = 0.5;
     // to correct any curving of the shot leftward or right ward
     public static double shootOffset = 0.5;
     // this is the counter that decides what stop to run in the auto lineup
@@ -14,13 +15,6 @@ public class AutoLineUpShot implements Runnable {
     private static int autoLineUpCounter = 0;
     // target angle during the entire process
     private static double target = 0;
-    private static double angleMaxOutput = 0.5;
-    // this variable is used to notify other classes and prevent them from
-    // taking action
-    private static boolean addShooterPower = false;
-    private static boolean autoLineUpInProgress = false;
-    // this is to stop the sending auto fire multiple times
-    private static boolean autoFireOnce = false;
     // just to count how many frames we used to lineup
     private static int frames_used = 0;
     private static long frameID;
@@ -31,35 +25,8 @@ public class AutoLineUpShot implements Runnable {
     private static boolean useMultipleFrames = false;
     private static boolean shootAfterAligned = false;
 
-    public static void setUseMultipleFrames(boolean value) {
-        useMultipleFrames = value;
-    }
+    public AutoLineUpShot() {
 
-    public static void setShootAfterAligned(boolean value) {
-        shootAfterAligned = value;
-    }
-
-    public static boolean setUseMultipleFrames() {
-        return useMultipleFrames;
-    }
-
-    public static boolean setShootAfterAligned() {
-        return shootAfterAligned;
-    }
-
-    public static void overrideAutoLineUp() {
-        autoLineUpCounter = 30;
-    }
-
-    public static void reset() {
-
-        resetAndStartTimer();
-        autoLineUpInProgress = false;
-        autoLineUpCounter = 0;
-        autoFireOnce = false;
-        shooterWheels.resetShooterFlags();
-        useMultipleFrames = false;
-        shootAfterAligned = false;
     }
 
     private static void resetAndStartTimer() {
@@ -67,24 +34,73 @@ public class AutoLineUpShot implements Runnable {
         timeSinceLastPrint.start();
     }
 
-    public static void addSomeShooterPower() {
-        addShooterPower = true;
+    public static boolean isRunning() {
+        return running;
     }
 
-    public static boolean isRunning() {
-        return autoLineUpInProgress;
+    public void setUseMultipleFrames(boolean value) {
+        useMultipleFrames = value;
+    }
+
+    public void setShootAfterAligned(boolean value) {
+        shootAfterAligned = value;
+    }
+
+    public boolean setUseMultipleFrames() {
+        return useMultipleFrames;
+    }
+
+    public boolean setShootAfterAligned() {
+        return shootAfterAligned;
+    }
+
+    public void overrideAutoLineUp() {
+        autoLineUpCounter = 30;
+    }
+
+    public void reset() {
+
+        resetAndStartTimer();
+        running = false;
+        autoLineUpCounter = 0;
+        shooterWheels.resetShooterFlags();
+        useMultipleFrames = false;
+        shootAfterAligned = false;
     }
 
     public void start() {
-        autoLineUpInProgress = true;
+        camera.setManualCapture();
+        //makes sure everything is fresh
+        reset();
+        //sets the running boolean to true
+        running = true;
+        //actually run the code... this should run on its own thread
+        run();
+    }
+
+    @Override
+    public void updateSmartDash() {
+
+    }
+
+    @Override
+    public void debug() {
+
     }
 
     public void run() {
         // Put dashboard values
 //		SmartDashboard.getNumber("shooter offset");
-        while (autoLineUpInProgress) {
+        while (running) {
             SmartDashboard.putNumber("Auto Line Up step: ", autoLineUpCounter);
-            currentTarget = camera.getTarget();
+            synchronized (cameraThread) {
+                currentTarget = camera.getTarget();
+                try {
+                    cameraThread.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             // SmartDashboard.putBoolean("Has Target", currentTarget != null);
             switch (autoLineUpCounter) {
                 default:
@@ -103,7 +119,6 @@ public class AutoLineUpShot implements Runnable {
 
                         // the target angle == current angle + targetAngleDiff + offset
                         target = driveTrain.getAngle() + currentTarget.ThetaDifference + shootOffset;
-                        oldFrameID = camera.getCurrentFrameID();
                         // Print out the values for debugging
                         System.out.print("Last System Out was " + timeSinceLastPrint.get());
                         System.out.println("my target is " + target + " current angle is " + driveTrain.getAngle()
@@ -173,7 +188,6 @@ public class AutoLineUpShot implements Runnable {
                         System.out.println("I'm trying to get to " + target + " I got to " + driveTrain.getAngle()
                                 + "\n    angle-target= " + (driveTrain.getAngle() - target));
                         currentTarget = camera.getTarget();
-                        frameID = camera.getCurrentFrameID();
                         frames_used++;
                         // engaged
                         // double check that we are close to the target angle

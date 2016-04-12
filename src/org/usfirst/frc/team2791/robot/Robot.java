@@ -14,6 +14,7 @@ import org.usfirst.frc.team2791.competitionSubsystems.ShakerShooterArm;
 import org.usfirst.frc.team2791.competitionSubsystems.ShakerShooterWheels;
 import org.usfirst.frc.team2791.helpers.AutonHelper;
 import org.usfirst.frc.team2791.helpers.TeleopHelper;
+import org.usfirst.frc.team2791.practicebotSubsystems.PracticeShakerShooterWheels;
 import org.usfirst.frc.team2791.practicebotSubsystems.PracticebotShakerDriveTrain;
 import org.usfirst.frc.team2791.practicebotSubsystems.PracticebotShakerIntake;
 import org.usfirst.frc.team2791.shakerJoystick.Driver;
@@ -67,11 +68,11 @@ public class Robot extends IterativeRobot {
             shooterWheels = new ShakerShooterWheels();
             shooterArm = new ShakerShooterArm();
         } else {
-            // subsystems
+            // practicebot
             driveTrain = new PracticebotShakerDriveTrain();
             intake = new PracticebotShakerIntake();
-            shooterWheels = new PracticebotShakerShooter();
-
+            shooterWheels = new PracticeShakerShooterWheels();
+            shooterArm = new ShakerShooterArm();
         }
         // Camera and shooter and drivetrain are put on their own thread to
         // prevent interference with main robot code
@@ -134,7 +135,7 @@ public class Robot extends IterativeRobot {
         if (operatorJoystick.getButtonSt()) {
             driveTrain.resetEncoders();
         }
-        AutoLineUpShot.reset();
+        visionShot.reset();
     }
 
     private void alwaysUpdatedSmartDashValues() {
