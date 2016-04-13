@@ -3,8 +3,8 @@ package org.usfirst.frc.team2791.helpers;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc.team2791.abstractSubsystems.OldAbstractShakershooterWheels.ShooterHeight;
-import org.usfirst.frc.team2791.commands.visionShot;
-import org.usfirst.frc.team2791.util.Toggle;
+import org.usfirst.frc.team2791.commands.AutoLineUpShot;
+import org.usfirst.frc.team2791.util.Latch;
 
 import static org.usfirst.frc.team2791.robot.Robot.*;
 
@@ -17,7 +17,7 @@ public class TeleopHelper extends ShakerHelper {
 	private static TeleopHelper teleop;
 	private static boolean cameraLineUp = false;
 	private SendableChooser driveTypeChooser;
-	private Toggle useArmAttachmentToggle;
+	private Latch useArmAttachmentLatch;
 	private boolean holdIntakeDown = false;
 
 	private TeleopHelper() {
@@ -33,7 +33,7 @@ public class TeleopHelper extends ShakerHelper {
 
 		// toggles, to prevent sending a subsystem a value too many times
 		// this is sort of like a light switch
-		useArmAttachmentToggle = new Toggle(false);
+		useArmAttachmentLatch = new Latch(false);
 	}
 
 	public static TeleopHelper getInstance() {
@@ -102,7 +102,7 @@ public class TeleopHelper extends ShakerHelper {
 			shooterWheels.setShooterSpeeds(0.6, false);
 			intake.pushBall();
 
-		} else if (!visionShot.isRunning() && !shooterWheels.getIfAutoFire()) {
+		} else if (!AutoLineUpShot.isRunning() && !shooterWheels.getIfAutoFire()) {
 			shooterWheels.setShooterSpeeds(operatorJoystick.getAxisRT() - operatorJoystick.getAxisLT(), false);
 			intake.stopMotors();
 		}
@@ -151,12 +151,12 @@ public class TeleopHelper extends ShakerHelper {
 			// previous cases apply
 			shooterWheels.resetServoAngle();
 
-		if (shooterWheels.getIfAutoFire() || visionShot.isRunning())
+		if (shooterWheels.getIfAutoFire() || AutoLineUpShot.isRunning())
 			compressor.stop();
 		else
 			compressor.start();
 
-		if ((operatorJoystick.getButtonLB() || driverJoystick.getDpadRight() || visionShot.isRunning())
+		if ((operatorJoystick.getButtonLB() || driverJoystick.getDpadRight() || AutoLineUpShot.isRunning())
 				&& !cameraLineUp) {
 			visionShot.run();}
 
@@ -171,7 +171,7 @@ public class TeleopHelper extends ShakerHelper {
 		if (!shooterWheels.getIfPreppingShot())
 			if (operatorJoystick.getButtonSel()) {
 				intake.internalExtendIntake();
-				useArmAttachmentToggle.setManual(true);
+				useArmAttachmentLatch.setManual(true);
 			} else if (driverJoystick.getButtonA() || operatorJoystick.getButtonB()
 					|| OldAbstractShakershooterWheels.delayedArmMove || operatorJoystick.getDpadLeft() || holdIntakeDown) {
 				// this runs if intaking ball too
@@ -181,8 +181,8 @@ public class TeleopHelper extends ShakerHelper {
 				intake.internalRetractIntake();
 
 		// arm attachment
-		useArmAttachmentToggle.giveToggleInput(driverJoystick.getButtonY() || operatorJoystick.getButtonY());
-		if (useArmAttachmentToggle.getToggleOutput())
+		useArmAttachmentLatch.giveToggleInput(driverJoystick.getButtonY() || operatorJoystick.getButtonY());
+		if (useArmAttachmentLatch.getToggleOutput())
 			intake.setArmAttachmentDown();
 		else
 			intake.setArmAttachmentUp();

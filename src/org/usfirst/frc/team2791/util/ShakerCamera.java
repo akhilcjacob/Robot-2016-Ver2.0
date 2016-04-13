@@ -35,13 +35,18 @@ public class ShakerCamera implements Runnable {
     //this is necessary to remove noise
     private int exposure = 1;
     private int brightness = 1;
+
+    private boolean manualMode = true;
     //image processing criteria array
     private NIVision.ParticleFilterCriteria2 criteria[];
     private NIVision.ParticleFilterOptions2 filterOptions;
     //RUN METHOD FLAGS
     //automatically put the image to the dashboard
     private boolean automaticCaptureAndUpdate = true;
+    //get a new frame and process it
     private boolean updateAndGetNewFrame = false;
+    //this is a flag to switch into the opposite camera mode
+    private boolean switchMode = false;
 
     private ParticleReport target = null;
 
@@ -52,11 +57,6 @@ public class ShakerCamera implements Runnable {
         camera.startCapture();
         binaryFrame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_U8, 0);
         particleBinaryFrame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_U8, 0);
-        //turn down exposure and brightness to reduce vision noise
-        camera.setBrightness(brightness);
-        camera.setExposureManual(exposure);
-        //Set the resolution of the camera
-        camera.setSize(640, 480);
         //put HSV filter values on the smartDashboard
         SmartDashboard.putNumber("H min", 20);
         SmartDashboard.putNumber("H max", 149);
@@ -76,7 +76,7 @@ public class ShakerCamera implements Runnable {
     }
 
     public void run() {
-        System.out.println("Starting the camera thread....");
+        firstTimeRunInit();
         while (true) {
             try {
                 if (automaticCaptureAndUpdate) {
@@ -89,7 +89,7 @@ public class ShakerCamera implements Runnable {
                         if (SmartDashboard.getBoolean("Debug Image")) {
                             //If the robot is in debugging image mode show the camera image
                             measureAndGetParticles();
-                            drawCrosHairs();
+                            drawCrossHairs();
                             CameraServer.getInstance().setImage(binaryFrame);
                         }
                     }
@@ -99,9 +99,21 @@ public class ShakerCamera implements Runnable {
                             System.out.println("Grabbing new frame and processing");
                             updateAndGetNewFrame = false;
                             camera.getImage(frame);
-                            target = getTarget();
+                            target = internalGetTarget();
                             notify();
                         }
+                    }
+                }
+                if (automaticCaptureAndUpdate) {
+                    if (switchMode) {
+                        if (!manualMode) {
+                            manualMode = true;
+                            setCameraSettings(brightness, exposure);
+                        } else {
+                            manualMode = false;
+                            setCameraSettingsAutomatic();
+                        }
+                        switchMode = false;
                     }
                 }
                 Thread.sleep(100);//run at a 100 hz
@@ -117,13 +129,48 @@ public class ShakerCamera implements Runnable {
     /******************
      * INTERNAL RUN METHODS
      ****************/
-    private void drawCrosHairs() {
+
+    private void firstTimeRunInit() {
+        //This is everything that needs to be run the first time on the run method
+        System.out.println("Starting the camera thread....");
+        try {
+            camera.setFPS(20);
+            //turn down exposure and brightness to reduce vision noise
+            camera.setBrightness(brightness);
+            camera.setExposureManual(exposure);
+            //Set the resolution of the camera
+            camera.setSize(640, 480);
+        } catch (VisionException e) {
+            e.printStackTrace();
+            //re-run if something goes wrong in the init
+            run();
+        }
+    }
+
+    private void setCameraSettings(int cameraBrightness, int cameraExposure) {
+        camera.setExposureManual(cameraExposure);
+        camera.setBrightness(cameraBrightness);
+        camera.updateSettings();
+    }
+
+    private void setCameraSettingsAutomatic() {
+        camera.setExposureAuto();
+        camera.setBrightness(25);
+        camera.updateSettings();
+    }
+
+    private void drawCrossHairs() {
         NIVision.imaqDrawLineOnImage(binaryFrame, binaryFrame, NIVision.DrawMode.DRAW_VALUE,
                 new NIVision.Point((int) frameWidth / 2, 0), new NIVision.Point((int) frameWidth / 2, (int) frameHeight), 100f);
         NIVision.imaqDrawLineOnImage(binaryFrame, binaryFrame, NIVision.DrawMode.DRAW_VALUE,
                 new NIVision.Point(0, (int) frameHeight / 2), new NIVision.Point((int) frameWidth, (int) frameHeight / 2), 100f);
     }
 
+    /**
+     * finds the target based on area and width
+     *
+     * @return information on the best target
+     */
     private ParticleReport internalGetTarget() {
         ArrayList<ParticleReport> reports = measureAndGetParticles();
         if (reports == null || reports.size() == 0) {
@@ -228,13 +275,14 @@ public class ShakerCamera implements Runnable {
         return particles;
     }
 
+    private double getNormalizedCenterOfMassX(double currentCenterInPixels) {
+        return ((2 * currentCenterInPixels) / frameWidth) - 1;
+    }
 
-    /******************END INTERNAL RUN METHODS****************/
-    /**
-     * finds the target based on area and width
-     *
-     * @return information on the best target
-     */
+    /******************
+     * END INTERNAL RUN METHODS
+     ****************/
+
     public void getNextFrame() {
         updateAndGetNewFrame = true;
     }
@@ -251,10 +299,14 @@ public class ShakerCamera implements Runnable {
         automaticCaptureAndUpdate = false;
     }
 
-    private double getNormalizedCenterOfMassX(double currentCenterInPixels) {
-        return ((2 * currentCenterInPixels) / frameWidth) - 1;
+    public void setCameraMode(boolean manual) {
+        //if it is already in the desired mode do nothing and break out of method
+        if (manualMode == manual)
+            return;
+        //if the modes don't match then turn the flag swtich to true
+        if (manual != manualMode)
+            switchMode = true;
     }
-
 
     public class ParticleReport {
         // a class just to busy values of the particles
@@ -267,9 +319,6 @@ public class ShakerCamera implements Runnable {
         public double BoundingRectBottom;
         public double CenterOfMassX;
         public double CenterOfMassY;
-        public double Range;
-        public double Height;
-        public double Width;
     }
 }
-}
+
