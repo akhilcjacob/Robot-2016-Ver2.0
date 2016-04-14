@@ -21,7 +21,6 @@ public class Constants {
 	public static final DoubleSolenoid.Value LARGE_PISTON_LOW_STATE = DoubleSolenoid.Value.kForward;
 
 	// INTAKE CONSTANTS
-	public static final double INTAKE_SPEED = 1.0;
 	// ANALOG
 	public static final int BALL_DISTANCE_SENSOR_PORT = 0;
 	// DIO
@@ -29,8 +28,6 @@ public class Constants {
 	public static final int LEFT_DRIVE_ENCODER_PORT_B = 2;
 	public static final int RIGHT_DRIVE_ENCOODER_PORT_A = 5;
 	public static final int RIGHT_DRIVE_ENCODER_PORT_B = 4;
-	public static final int RIGHT_INTAKE_LIMIT_SWITCH = 8;
-	public static final int LEFT_INTAKE_LIMIT_SWITCH = 9;
 	// PWM PORTS
 	public static final int DRIVE_TALON_LEFT_PORT_FRONT = 5;
 	public static final int DRIVE_TALON_LEFT_PORT_BACK = 4;

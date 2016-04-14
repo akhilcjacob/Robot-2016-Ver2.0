@@ -7,6 +7,7 @@ import java.util.Arrays;
 /**
  * Created by Akhil on 4/13/2016.
  * This class uses the twiddle algorithm to calculate PID gains
+ * This is based on theory and has yet to be tested
  */
 public class AutomaticPIDTuner implements Runnable {
     Thread tunerThread;
