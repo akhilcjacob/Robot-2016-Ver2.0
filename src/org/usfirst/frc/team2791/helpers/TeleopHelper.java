@@ -20,7 +20,7 @@ public class TeleopHelper extends ShakerHelper {
 
     private TeleopHelper() {
         // init
-        // Smartdashboard dropdown menu that lets you select the input mode
+        // Smart dashboard dropdown menu that lets you select the input mode
         driveTypeChooser = new SendableChooser();
         SmartDashboard.putData("Drive Chooser", driveTypeChooser);
         driveTypeChooser.addObject("Tank Drive", "TANK");
