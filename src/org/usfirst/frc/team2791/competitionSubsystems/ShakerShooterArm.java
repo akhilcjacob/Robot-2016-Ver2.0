@@ -1,6 +1,7 @@
 package org.usfirst.frc.team2791.competitionSubsystems;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Solenoid;
 import org.usfirst.frc.team2791.abstractSubsystems.AbstractShakerShooterArm;
 import org.usfirst.frc.team2791.util.Constants;
 
@@ -12,6 +13,7 @@ import org.usfirst.frc.team2791.util.Constants;
 public class ShakerShooterArm extends AbstractShakerShooterArm {
     private DoubleSolenoid shortPiston;
     private DoubleSolenoid longPiston;
+    private Solenoid chevalArmPiston;
 
     public ShakerShooterArm() {
 
@@ -19,6 +21,12 @@ public class ShakerShooterArm extends AbstractShakerShooterArm {
                 Constants.LONG_PISTON_REVERSE);
         shortPiston = new DoubleSolenoid(Constants.PCM_MODULE, Constants.SHORT_PISTON_FORWARD,
                 Constants.SHORT_PISTON_REVERSE);
+        chevalArmPiston = new Solenoid(Constants.PCM_MODULE, Constants.FUN_BRIDGE_ARM_PORT);
+    }
+
+
+    public void setChevalArm(boolean down) {
+        chevalArmPiston.set(down);
     }
 
     public ShooterHeight getSolenoidState() {

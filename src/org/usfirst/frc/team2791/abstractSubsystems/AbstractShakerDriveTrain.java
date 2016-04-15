@@ -29,7 +29,6 @@ public class AbstractShakerDriveTrain extends ShakerSubsystem implements Runnabl
     protected Encoder rightDriveEncoder = null;
     // this should be instantiated by the extending class
     protected RobotDrive robotDrive = null;
-    protected RobotDrive robotDrive_2 = null;
     //Distance PID flags
     private boolean useDistancePID = false;
     private boolean distancePID_useFastExit = false;
@@ -37,12 +36,14 @@ public class AbstractShakerDriveTrain extends ShakerSubsystem implements Runnabl
     private double distancePID_distanceSetpoint;
     private double distancePID_movingAngleSetpoint = 0;
     private boolean distancePID_atTarget = false;
+    private boolean distancePID_holdSetpoint = false;
     //Angle PID flags
     private boolean useAnglePID = false;
     private boolean anglePID_useFastExit = false;
     private double anglePID_maxOutput = 1.0;
     private double anglePID_angleSetpoint = 0;
     private boolean anglePID_atTarget = false;
+    private boolean anglePID_holdSetPoint = false;
     //miscellaneous
     private Timer anglePIDTimer;
     private Timer distancePIDTimer;
@@ -92,7 +93,7 @@ public class AbstractShakerDriveTrain extends ShakerSubsystem implements Runnabl
                 //busy mode pretty much makes sure nothing else should run
                 //while pid's are running
                 busy = useAnglePID || useDistancePID;
-                if (useAnglePID) {
+                if (useAnglePID || anglePID_holdSetPoint) {
                     //global variable is returned when something calls the public setAngle
                     anglePID_atTarget = setAngleInternal(anglePID_angleSetpoint,
                             anglePID_maxOutput, anglePID_useFastExit);
@@ -100,7 +101,7 @@ public class AbstractShakerDriveTrain extends ShakerSubsystem implements Runnabl
                     useAnglePID = !anglePID_atTarget;
                 }
 
-                if (useDistancePID) {
+                if (useDistancePID || distancePID_holdSetpoint) {
                     //global variable is returned when something calls the public setDistance
                     distancePID_atTarget = setDistanceInternal(distancePID_distanceSetpoint,
                             distancePID_movingAngleSetpoint, distancePID_maxOutput, distancePID_useFastExit);
@@ -206,59 +207,99 @@ public class AbstractShakerDriveTrain extends ShakerSubsystem implements Runnabl
      * This method is called in teleop and sets variables that are used in the
      * run method to run our angle PID.
      *
-     * @param angle     The angle you want to robot to turn to
-     * @param maxOutput The maximum output to use for this turn
-     * @param fastExit  If this is true this method returns true when the drive train
-     *                  stop moving quickly. If this is false the default behavior of
-     *                  returning true if the error is less than 0.5 for longer than
-     *                  0.5s.
+     * @param angle        The angle you want to robot to turn to
+     * @param maxOutput    The maximum output to use for this turn
+     * @param holdSetPoint If this is true the angle code will hold the angle even after reaching it, must be
+     *                     call method releaseAnglePID() to break out of it
+     * @param fastExit     If this is true this method returns true when the drive train
+     *                     stop moving quickly. If this is false the default behavior of
+     *                     returning true if the error is less than 0.5 for longer than
+     *                     0.5s.
      * @return whether or not the target angle has been reached
      */
-    public boolean setAngle(double angle, double maxOutput, boolean fastExit) {
+    public boolean setAngle(double angle, double maxOutput, boolean holdSetPoint, boolean fastExit) {
         useAnglePID = true;
         anglePID_angleSetpoint = angle;
         anglePID_maxOutput = maxOutput;
         anglePID_useFastExit = fastExit;
+        anglePID_holdSetPoint = holdSetPoint;
         return anglePID_atTarget;
     }
 
     public boolean setAngle(double angle, double maxOutput) {
-        return setAngle(angle, maxOutput, false);
+        return setAngle(angle, maxOutput, false, false);
+    }
+
+    public void releaseAnglePID() {
+        anglePID_holdSetPoint = false;
     }
 
     /**
      * This method is called in teleop and sets variables that are used in the
      * run method to run our distance PID.
      *
-     * @param distance  The distance you want the pid to go
-     * @param angle     The angle you want the robot to maintain while going the distance
-     * @param maxOutput The max output for driving
-     * @param fastExit  If this is true this method returns true when the drive train
-     *                  stop moving quickly. If this is false the default behavior of
-     *                  returning true if the error is less than 0.5 for longer than
-     *                  0.5s.
+     * @param distance     The distance you want the pid to go
+     * @param angle        The angle you want the robot to maintain while going the distance
+     * @param maxOutput    The max output for driving
+     * @param holdSetPoint If this is true the robot will continue to hold the distance until it is released, using
+     *                     method releaseDistancePID()
+     * @param fastExit     If this is true this method returns true when the drive train
+     *                     stop moving quickly. If this is false the default behavior of
+     *                     returning true if the error is less than 0.5 for longer than
+     *                     0.5s.
      * @return whether the distance has been reached
      */
-    public boolean setDistance(double distance, double angle, double maxOutput, boolean fastExit) {
+    public boolean setDistance(double distance, double angle, double maxOutput, boolean holdSetPoint, boolean fastExit) {
         useDistancePID = true;
         distancePID_distanceSetpoint = distance;
         distancePID_movingAngleSetpoint = angle;
         distancePID_maxOutput = maxOutput;
         distancePID_useFastExit = fastExit;
+        distancePID_holdSetpoint = holdSetPoint;
         return distancePID_atTarget;
     }
 
     public boolean setDistance(double distance, double angle, double maxOutput) {
-        return setDistance(distance, angle, maxOutput, false);
+        return setDistance(distance, angle, maxOutput, false, false);
+    }
+
+    public void releaseDistancePID() {
+        distancePID_holdSetpoint = false;
     }
 
     public boolean getIfBusy() {
         return busy;
     }
 
+    public void forceBreakAnglePID() {
+        //forcefully breaks out of the angle pid even if hasnt reached the target
+        useAnglePID = false;
+        releaseAnglePID();
+    }
+
+    public void forceBreakDistancePID() {
+        //forcefully break out of the distance pid even if setpoint hasnt been reaced
+        useDistancePID = false;
+        releaseDistancePID();
+    }
+
+    public void forceBreakPID() {
+        //break out of any running pid
+        forceBreakAnglePID();
+        forceBreakDistancePID();
+    }
+
     public void resetEncoders() {
         leftDriveEncoder.reset();
         rightDriveEncoder.reset();
+    }
+
+    public double getStationaryPIDError() {
+        return stationaryAnglePID.getError();
+    }
+
+    public double getDistancePIDError() {
+        return distancePID.getError();
     }
 
     public double getLeftVelocity() {
@@ -297,11 +338,13 @@ public class AbstractShakerDriveTrain extends ShakerSubsystem implements Runnabl
     }
 
     public double getAngleEncoder() {
+        //returns the angle using encoder values
         return (90 / 2.3) * (getLeftDistance() - getRightDistance()) / 2.0;
 
     }
 
     public double getEncoderAngleRate() {
+        //return the rate at which we are spinning
         return (90 / 2.3) * (leftDriveEncoder.getRate() - rightDriveEncoder.getRate()) / 2.0;
 
     }

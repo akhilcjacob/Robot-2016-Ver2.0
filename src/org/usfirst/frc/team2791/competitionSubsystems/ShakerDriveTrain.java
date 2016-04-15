@@ -7,6 +7,13 @@ import org.usfirst.frc.team2791.abstractSubsystems.AbstractShakerDriveTrain;
 import org.usfirst.frc.team2791.overridenClasses.TalonSet;
 import org.usfirst.frc.team2791.util.Constants;
 
+/**
+ * Created by Akhil on 4/13/2016.
+ * This class extends off of AbstractShakerDriveTrain, this system is setup
+ * to support different use of electronics and solenoid between the practice robot
+ * and the competition robot
+ */
+
 public class ShakerDriveTrain extends AbstractShakerDriveTrain {
 
     private Talon leftTalonA;

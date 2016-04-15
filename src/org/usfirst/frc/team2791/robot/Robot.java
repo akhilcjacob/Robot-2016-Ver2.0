@@ -82,10 +82,10 @@ public class Robot extends IterativeRobot {
         driveTrainThread = new Thread(driveTrain);
         driveTrainThread.start();
 
-        camera = ShakerCamera.getInstance();
+        camera = new ShakerCamera();
         cameraThread = new Thread(camera);
         cameraThread.start();
-        camera.setCameraValues(1, 1);
+        camera.setCameraMode(true);
 
         visionShot = new AutoLineUpShot();
         AutoLineUpThread = new Thread(visionShot);
@@ -126,19 +126,21 @@ public class Robot extends IterativeRobot {
     }
 
     public void disabledPeriodic() {
-        super.disabledPeriodic();
         teleopHelper.disableRun();
-        compressor.stop();
         autonHelper.disableRun();
         alwaysUpdatedSmartDashValues();
-
+        //reset the encoders if need be, this is rarely used(usually debugging)
         if (operatorJoystick.getButtonSt()) {
             driveTrain.resetEncoders();
         }
         visionShot.reset();
+        shooterWheels.resetShooterFlags();
+        driveTrain.forceBreakPID();
+        compressor.stop();
     }
 
     private void alwaysUpdatedSmartDashValues() {
+        //These are values that are always updated even in disabled
         SmartDashboard.putNumber("Gyro Rate", driveTrain.getEncoderAngleRate());
         SmartDashboard.putNumber("Gyro angle", driveTrain.getAngle());
         debuggingMode = SmartDashboard.getBoolean("DEBUGGING MODE");

@@ -36,7 +36,7 @@ public class VisionLineupWithSearch extends AutonMode {
                 state++;
                 break;
             case 2:
-                if (driveTrain.setDistance(firstDistance, 0, 0.65, false)) {
+                if (driveTrain.setDistance(firstDistance, 0, 0.65, false, false)) {
                     // intake.setArmAttachmentDown();
                     System.out.println("Drove the first distance");
                     driveTrain.resetEncoders();
@@ -59,27 +59,28 @@ public class VisionLineupWithSearch extends AutonMode {
                 state++;
                 break;
             case 5:
-                if (!AutoLineUpShot.isRunning()) {
-                    state = 7;
-                    System.out.println("Auto lineup is no longer running and finishing up");
-                } else if (camera.getTarget() == null && visionLineUpTimer.get() < 1) {
+                if (camera.getTarget() == null && visionLineUpTimer.get() < 1) {
                     //That means that autolineup probably ran too quickly so do a quick turn
                     //to scan nearby
-
                     state++;
+                } else if (!AutoLineUpShot.isRunning()) {
+                    state = 7;
+                    System.out.println("Auto lineup is no longer running and finishing up");
                 }
                 break;
             case 6:
-                if (driveTrain.setAngle(angle *= multiplier, 0.65, true)) {
+                //set the drive train to look rightward first then leftward
+                if (driveTrain.setAngle(angle *= multiplier, 0.65, false, true)) {
                     state = 4;
                 }
                 break;
             case 7:
-                if (driveTrain.setAngle(0, 0.65, true))
+                //zero the angle
+                if (driveTrain.setAngle(0, 0.65, false, true))
                     state++;
                 break;
             case 8:
-                if (driveTrain.setDistance(-firstDistance, 0, .65, true))
+                if (driveTrain.setDistance(-firstDistance, 0, .65, false, true))
                     state++;
                 break;
             case 9:

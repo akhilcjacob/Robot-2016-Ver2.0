@@ -7,8 +7,8 @@ import org.usfirst.frc.team2791.util.Constants;
 
 
 public class ShakerIntake extends AbstractShakerIntake {
-    protected Solenoid intakeSolenoid;
-    protected Solenoid armAttachment;
+    private Solenoid intakeSolenoid;
+    private Solenoid armAttachment;
 
     public ShakerIntake() {
         // init

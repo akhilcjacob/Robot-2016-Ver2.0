@@ -98,6 +98,7 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
             if (shooterArmMoving) {
                 internalShooterArmMoving();
                 shooterArmMoving = false;
+                stopMotors();
             }
             busy = prepShot || completeShot;
             double setPoint = internalGetSetPoint();
@@ -109,6 +110,7 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
             if (completeShot) {
                 internalAutoFire(setPoint);
                 resetShooterFlags();
+                stopMotors();
             }
 
         }
@@ -225,6 +227,7 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
     }
 
     public void shooterArmMoving() {
+        //this flag runs the wheels inward so it sucks the ball in
         shooterArmMoving = true;
     }
 
@@ -239,6 +242,9 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
         return completeShot;
     }
 
+    public boolean getIfBusy() {
+        return busy;
+    }
     /*
      *shooter wheel control
      */

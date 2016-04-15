@@ -2,6 +2,12 @@ package org.usfirst.frc.team2791.practicebotSubsystems;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
+/**
+ * Created by Akhil on 4/10/2016.
+ * This class holds all important constant values for quick and easy changes
+ * if needed
+ */
+
 public class PracticebotConstants {
     // ROBOCLOCK
     public static final double CODE_EXECUTION_PERIOD = 0.02;

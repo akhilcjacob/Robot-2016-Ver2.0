@@ -21,6 +21,9 @@ public abstract class PracticebotShakerShooterArm extends AbstractShakerShooterA
 
     }
 
+    protected void setChevalArm() {
+    }
+
     public ShooterHeight getShooterHeight() {
         // get current shooter height by determining which solenoid are true
         if (shortPiston.get().equals(PracticebotConstants.SMALL_PISTON_HIGH_STATE)

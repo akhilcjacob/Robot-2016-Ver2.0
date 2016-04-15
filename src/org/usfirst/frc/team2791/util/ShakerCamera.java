@@ -50,7 +50,7 @@ public class ShakerCamera implements Runnable {
 
     private ParticleReport target = null;
 
-    private ShakerCamera() {
+    public ShakerCamera() {
         //create camera object
         camera = new USBCamera(CAMERA_PORT);
         //start capture basically like an init method
@@ -148,18 +148,22 @@ public class ShakerCamera implements Runnable {
     }
 
     private void setCameraSettings(int cameraBrightness, int cameraExposure) {
+        //sets the brightness and exposure really low for vision processing
         camera.setExposureManual(cameraExposure);
         camera.setBrightness(cameraBrightness);
         camera.updateSettings();
     }
 
     private void setCameraSettingsAutomatic() {
+        //sets the camera input to automatic exposure and higher brightness then pushes them to the camera
         camera.setExposureAuto();
         camera.setBrightness(25);
         camera.updateSettings();
     }
 
+
     private void drawCrossHairs() {
+        //draws cross hairs for debugging purposes
         NIVision.imaqDrawLineOnImage(binaryFrame, binaryFrame, NIVision.DrawMode.DRAW_VALUE,
                 new NIVision.Point((int) frameWidth / 2, 0), new NIVision.Point((int) frameWidth / 2, (int) frameHeight), 100f);
         NIVision.imaqDrawLineOnImage(binaryFrame, binaryFrame, NIVision.DrawMode.DRAW_VALUE,
@@ -167,9 +171,9 @@ public class ShakerCamera implements Runnable {
     }
 
     /**
-     * finds the target based on area and width
+     * finds the best target based on area and width
      *
-     * @return information on the best target
+     * @return class with values on the target
      */
     private ParticleReport internalGetTarget() {
         ArrayList<ParticleReport> reports = measureAndGetParticles();
@@ -209,6 +213,11 @@ public class ShakerCamera implements Runnable {
         return par;
     }
 
+    /**
+     * Takes an image and removes noise and find possible targets
+     *
+     * @return an arraylist with infomration on every possible blob in the fov
+     */
     private ArrayList<ParticleReport> measureAndGetParticles() {
         //Store measured values from the particles
         ArrayList<ParticleReport> particles = new ArrayList<ParticleReport>();
@@ -254,7 +263,7 @@ public class ShakerCamera implements Runnable {
                 par.CenterOfMassY /= 2;
                 // calculate the angle from the middle
                 double angleFromMiddle = CAMERA_WIDTH_DEGREES * getNormalizedCenterOfMassX(par.CenterOfMassX);
-                par.ThetaDifference = angleFromMiddle / 2;
+                par.optimalTurnAngle = angleFromMiddle / 2;
                 // creates a rectangle to cover the target
                 NIVision.Rect r = new NIVision.Rect((int) par.BoundingRectTop, (int) par.BoundingRectLeft,
                         Math.abs((int) (par.BoundingRectTop - par.BoundingRectBottom)),
@@ -264,7 +273,7 @@ public class ShakerCamera implements Runnable {
                         NIVision.ShapeMode.SHAPE_RECT, 125f);
 
                 // put the important values to the dashboard
-                SmartDashboard.putNumber("Theta diff", par.ThetaDifference);
+                SmartDashboard.putNumber("Theta diff", par.optimalTurnAngle);
                 SmartDashboard.putNumber("center of mass x", par.CenterOfMassX);
                 SmartDashboard.putNumber("Boudnding rect top", par.BoundingRectTop);
                 SmartDashboard.putNumber("Normalized center of mass x",
@@ -291,10 +300,16 @@ public class ShakerCamera implements Runnable {
         return target;
     }
 
+    /**
+     * this is for normal camera use and it automatically puts images onto the dashboard
+     */
     public void setAutomaticCaptureAndUpdate() {
         automaticCaptureAndUpdate = true;
     }
 
+    /**
+     * this is for vision processing, it sets it to a mode where each images has to be requested for
+     */
     public void setManualCapture() {
         automaticCaptureAndUpdate = false;
     }
@@ -308,17 +323,21 @@ public class ShakerCamera implements Runnable {
             switchMode = true;
     }
 
+    public void switchMode() {
+        switchMode = true;
+    }
+
     public class ParticleReport {
         // a class just to busy values of the particles
-        public double ThetaDifference;
-        public double PercentAreaToImageArea;
-        public double Area;
-        public double BoundingRectLeft;
-        public double BoundingRectTop;
-        public double BoundingRectRight;
-        public double BoundingRectBottom;
-        public double CenterOfMassX;
-        public double CenterOfMassY;
+        public double optimalTurnAngle;
+        double PercentAreaToImageArea;
+        double Area;
+        double BoundingRectLeft;
+        double BoundingRectTop;
+        double BoundingRectRight;
+        double BoundingRectBottom;
+        double CenterOfMassX;
+        double CenterOfMassY;
     }
 }
 

@@ -6,6 +6,11 @@ import org.usfirst.frc.team2791.util.ShakerCamera.ParticleReport;
 
 import static org.usfirst.frc.team2791.robot.Robot.*;
 
+/**
+ * Created by Akhil on 1/28/2016.
+ * This class uses vision processing to automatically line up the robot
+ * with the target
+ */
 public class AutoLineUpShot extends ShakerCommand implements Runnable {
     private static final double angleMaxOutput = 0.5;
     // to correct any curving of the shot leftward or right ward
@@ -70,6 +75,7 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
         //run method flags
         useMultipleFrames = false;
         shootAfterAligned = false;
+        driveTrain.forceBreakPID();
     }
 
     public void start() {
@@ -114,7 +120,7 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
                         shooterWheels.prepShot();
 
                     // the target angle == current angle + targetAngleDiff + offset
-                    target = driveTrain.getAngle() + currentTarget.ThetaDifference + shootOffset;
+                    target = driveTrain.getAngle() + currentTarget.optimalTurnAngle + shootOffset;
                     // Print out the values for debugging
                     System.out.print("Last System Out was " + totalTime.get());
                     System.out.println("my target is " + target + " current angle is " + driveTrain.getAngle()
@@ -149,7 +155,7 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
                 case 10: // this is the single line up and shoot case
                     // set the drive train to the target angle, will return true when
                     // reached there
-                    if (driveTrain.setAngle(target, angleMaxOutput, true) && shooterWheels.shooterAtSpeed()) {
+                    if (driveTrain.setAngle(target, angleMaxOutput, true, true) && shooterWheels.shooterAtSpeed()) {
                         // for debugging
                         shooterWheels.completeShot();
 
@@ -162,7 +168,7 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
                     break;
 
                 case 15: // this is the single line up and don't shoot case
-                    if (driveTrain.setAngle(target, angleMaxOutput, true)) {
+                    if (driveTrain.setAngle(target, angleMaxOutput, true, true)) {
                         // for debugging
 
                         System.out.print("Last System Out was " + totalTime.get());
@@ -177,47 +183,43 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
                     // here we check if our current angele is good enough
                     // if now we reset out target using the latest camera image
                     // and try to drive to it
-                    if (driveTrain.setAngle(target, angleMaxOutput, true)) { // keep the
-                        // drivetrain
-                        System.out.println("I'm trying to get to " + target + " I got to " + driveTrain.getAngle()
-                                + "\n    angle-target= " + (driveTrain.getAngle() - target));
-                        reUpdateCurrentTarget();
-                        frames_used++;
-                        // engaged
-                        // double check that we are close to the target angle
-                        // if we got a new frame process it
+                    System.out.println("I'm trying to get to " + target + " I got to " + driveTrain.getAngle()
+                            + "\n    angle-target= " + (driveTrain.getAngle() - target));
+                    reUpdateCurrentTarget();
+                    frames_used++;
 
-                        double camera_error = currentTarget.ThetaDifference + shootOffset;
-                        System.out.println("Double check camera error: " + camera_error);
-                        // if error is minimal shoot
-                        if (Math.abs(camera_error) < 0.75 && shooterWheels.shooterAtSpeed()) {
-                            // go to the next step
-                            // shoot whenever ready
-                            System.out.println(
-                                    "I've found a good angle and am going to busy it while the shooter spins up. t:"
-                                            + totalTime.get());
-                            shooterWheels.completeShot();
-                            // we should be firing when the auto fire method is
-                            // called
-                            // the state we jump to will busy our angle until
-                            // the auto fire method
-                            // is completed
-                            autoLineUpCounter = 30;
-                        } else {
-                            if (!shooterWheels.shooterAtSpeed()) {
-                                System.out.println("I am waiting on the shooter wheels t:" + totalTime.get());
-                            }
-                            if (!(Math.abs(camera_error) < 0.75)) {
-                                System.out.println("I am waiting on camera error t:" + totalTime.get());
-                            }
-                            // too much error so we're going to drive again
-                            // update the target and the setAngle in the if
-                            // statement in the top of
-                            // this method will move us
-                            target = driveTrain.getAngle() + currentTarget.ThetaDifference + shootOffset;
+                    // double check that we are close to the target angle
+                    // if we got a new frame process it
+                    double camera_error = currentTarget.optimalTurnAngle + shootOffset;
+                    System.out.println("Double check camera error: " + camera_error);
+                    // if error is minimal shoot
+                    if (Math.abs(camera_error) < 0.75 && shooterWheels.shooterAtSpeed()) {
+                        // go to the next step
+                        // shoot whenever ready
+                        System.out.println(
+                                "I've found a good angle and am going to busy it while the shooter spins up. t:"
+                                        + totalTime.get());
+                        shooterWheels.completeShot();
+                        // we should be firing when the auto fire method is
+                        // called
+                        // the state we jump to will busy our angle until
+                        // the auto fire method
+                        // is completed
+                        autoLineUpCounter = 30;
+                    } else {
+                        if (!shooterWheels.shooterAtSpeed()) {
+                            System.out.println("I am waiting on the shooter wheels t:" + totalTime.get());
                         }
+                        if (!(Math.abs(camera_error) < 0.75)) {
+                            System.out.println("I am waiting on camera error t:" + totalTime.get());
+                        }
+                        // too much error so we're going to drive again
+                        // update the target and the setAngle in the if
+                        // statement in the top of
+                        // this method will move us
+                        target = driveTrain.getAngle() + currentTarget.optimalTurnAngle + shootOffset;
+                    }
 
-                    } // endif driveTrain.setAngle
                     break;
 
                 case 30:
@@ -252,7 +254,7 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
      * This solves problems we had earlier about having the new frame be the same as the previous frame
      * it also lets us process the frame on the camera thread
      */
-    public void reUpdateCurrentTarget() {
+    private void reUpdateCurrentTarget() {
         synchronized (cameraThread) {
             camera.getNextFrame();
             try {

@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * Created by Akhil on 4/10/2016.
  * This class controls the actuation of the shooter arm, originally
  * part of the shooter wheels class but seperated for easier readability
+ * This class also includes the attachment for cheval at the back of the bot
  */
 public abstract class AbstractShakerShooterArm extends ShakerSubsystem {
     private Timer actuationTimer;
@@ -16,6 +17,8 @@ public abstract class AbstractShakerShooterArm extends ShakerSubsystem {
         actuationTimer = new Timer();
         actuationTimer.start();
     }
+
+    public abstract void setChevalArm(boolean down);
 
     public abstract ShooterHeight getSolenoidState();
 
