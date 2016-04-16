@@ -143,6 +143,7 @@ public abstract class AbstractShakerIntake extends ShakerSubsystem {
         // runs methods to bring back to original position
         internalRetractIntake();
         stopMotors();
+        busy = false;
     }
 
     public void disable() {

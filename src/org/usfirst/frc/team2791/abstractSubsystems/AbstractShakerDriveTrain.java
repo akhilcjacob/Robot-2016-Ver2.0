@@ -353,6 +353,7 @@ public class AbstractShakerDriveTrain extends ShakerSubsystem implements Runnabl
     public void disable() {
         // Stops all the motors
         robotDrive.stopMotor();
+        forceBreakPID();
     }
 
     /**
