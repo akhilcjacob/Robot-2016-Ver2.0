@@ -1,5 +1,7 @@
 package org.usfirst.frc.team2791.AutomaticPIDTuner;
 
+import edu.wpi.first.wpilibj.Timer;
+
 import java.util.Arrays;
 
 /**
@@ -49,7 +51,7 @@ public abstract class AbstractPIDTuner implements Runnable {
     /**
      * This method is the main tuner, the idea behind is basically a little guess and check in
      * a sense. First we start with one of constants(p,i,d) then increment it with the correspoinding
-     * incrementer, then set and see if the error decreases or increases. if the error increases then
+     * incrementer, then set and see if the error decreases or increases. if the accumulated error increases then
      * undo the most recent change and then decrease the incrementer because we are closer to a good
      * parameter, if the error increases the increase the corresponding incrementer because that means
      * we are really far away from the a good value.
@@ -57,30 +59,47 @@ public abstract class AbstractPIDTuner implements Runnable {
      * @param firstSetpoint starting firstSetpoint, this code will oscilate between
      */
     public void calculateAndUpdateGains(double firstSetpoint, double secondSetpoint) {
-        //keep running until the imcrementers are near 0
-        double currentError = 100;
+        double currentError = 1000;//make it some arbitrary number that error could never be
         int passNumber = 0;//how many attempts it takes
+        //keep running until the imcrementers are near 0
         while (pidIncrementer[0] + pidIncrementer[1] + pidIncrementer[2] > tolerance) {
+            //iterate through each gain
             for (int x = 0; x < 3; x++) {
+                //add increment value to current gain
                 pid[x] += pidIncrementer[x];
+                //modify the gains for the pid we are currently tuning
                 setGains(pid[0], pid[1], pid[2]);
+                //set a setpoint
                 set(firstSetpoint);
-                sleep(3000);
-                currentError = getError();
+                //get the total amount of error in 3 seconds
+                currentError = errorAccumulator();
+                //if the new error is lower then the best one we are too far away
+                //from a good gain constant
                 if (currentError < bestError) {
+                    //save the error
                     bestError = currentError;
+                    //increase it because we were still able to fix the error
                     pidIncrementer[x] *= 1.1;
                 } else {
+                    //if increasing the gain didn't help we are getting close
+                    //reset the gain value
                     pid[x] -= 2.0 * pidIncrementer[x];
+                    //modify the gains again
                     setGains(pid[0], pid[1], pid[2]);
+                    //change the setpoint
                     set(secondSetpoint);
-                    sleep(3000);
-                    currentError = getError();
+                    //accumulate the error again
+                    currentError = errorAccumulator();
+                    //check if the error is better
                     if (currentError < bestError) {
+                        //if better save the error
                         bestError = currentError;
+                        //increase the pid gain b/c we were able to correct
                         pidIncrementer[x] *= 1.1;
                     } else {
+                        //if not increase the value
                         pid[x] += pidIncrementer[x];
+                        //then decrease the incrementer because we are closer
                         pidIncrementer[x] *= 0.9;
                     }
                 }
@@ -94,12 +113,24 @@ public abstract class AbstractPIDTuner implements Runnable {
         System.out.println("The best pid values are " + Arrays.toString(pid));
     }
 
-    private void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    /**
+     * This class runs for three seconds and totals the amount of error, including
+     * oscillation error.
+     *
+     * @return The total amount of error in the three seconds
+     */
+    private double errorAccumulator() {
+        Timer tempTimer = new Timer();
+        double totalError = 0;
+        tempTimer.reset();
+        tempTimer.start();
+        //This runs for 3 seconds and totals the error
+        while (tempTimer.get() < 3)
+            totalError += Math.abs(getError());
+        if (totalError == 0)
+            //If this runs that means there was no error at all which is impossible
+            System.out.println("There is something wrong, error wasn't accumulated properly");
+        return totalError;
     }
 
     public void start() {
