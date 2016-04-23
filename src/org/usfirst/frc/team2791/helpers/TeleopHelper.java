@@ -97,7 +97,7 @@ public class TeleopHelper extends ShakerHelper {
         }
 
         //This switches between automatic and manual mode on the camera
-        if (operatorJoystick.getButtonLS()) {
+        if (operatorJoystick.getButtonSel()) {
             camera.switchMode();
         }
         //This is for the acutuation of servo arm, if shooter is firing right now
@@ -141,6 +141,12 @@ public class TeleopHelper extends ShakerHelper {
         if (operatorJoystick.getButtonLB() || driverJoystick.getDpadRight()) {
             visionShot.setUseMultipleFrames(true);
             visionShot.setShootAfterAligned(true);
+            visionShot.start();
+        }
+        if (operatorJoystick.getButtonLS()) {
+            visionShot.setUseMultipleFrames(true);
+            visionShot.setShootAfterAligned(true);
+            visionShot.setQuickLineUpShot(true);
             visionShot.start();
         }
     }

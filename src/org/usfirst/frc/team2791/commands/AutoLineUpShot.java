@@ -12,7 +12,7 @@ import static org.usfirst.frc.team2791.robot.Robot.*;
  * with the target
  */
 public class AutoLineUpShot extends ShakerCommand implements Runnable {
-    private static final double angleMaxOutput = 0.5;
+    private static final double angleMaxOutput = 0.6;
     // to correct any curving of the shot leftward or right ward
     public static double shootOffset = 0.5;
     // this is the counter that decides what stop to run in the auto lineup
@@ -27,6 +27,7 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
 
     private static boolean useMultipleFrames = false;
     private static boolean shootAfterAligned = false;
+    private static boolean quickLineUpShot = false;
 
     public AutoLineUpShot() {
 
@@ -47,6 +48,13 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
 
     public void setShootAfterAligned(boolean value) {
         shootAfterAligned = value;
+    }
+
+    public void setQuickLineUpShot(boolean value) {
+        /*
+        This method makes the double check camera error much higher so the botis less accurate but shoots earlier
+         */
+        quickLineUpShot = value;
     }
 
     public boolean setUseMultipleFrames() {
@@ -75,6 +83,7 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
         //run method flags
         useMultipleFrames = false;
         shootAfterAligned = false;
+        quickLineUpShot = false;
         driveTrain.forceBreakPID();
     }
 
@@ -193,7 +202,12 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
                     double camera_error = currentTarget.optimalTurnAngle + shootOffset;
                     System.out.println("Double check camera error: " + camera_error);
                     // if error is minimal shoot
-                    if (Math.abs(camera_error) < 0.75 && shooterWheels.shooterAtSpeed()) {
+                    //if quick lineup is toggled it allows the bot to be done quicker rather than more accurate
+                    double cameraErrorThreshold = 0.75;
+                    if (quickLineUpShot)
+                        cameraErrorThreshold = 1.5;//TODO mess with this value
+
+                    if (Math.abs(camera_error) < cameraErrorThreshold && shooterWheels.shooterAtSpeed()) {
                         // go to the next step
                         // shoot whenever ready
                         System.out.println(
@@ -210,7 +224,7 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
                         if (!shooterWheels.shooterAtSpeed()) {
                             System.out.println("I am waiting on the shooter wheels t:" + totalTime.get());
                         }
-                        if (!(Math.abs(camera_error) < 0.75)) {
+                        if (!(Math.abs(camera_error) < cameraErrorThreshold)) {
                             System.out.println("I am waiting on camera error t:" + totalTime.get());
                         }
                         // too much error so we're going to drive again
