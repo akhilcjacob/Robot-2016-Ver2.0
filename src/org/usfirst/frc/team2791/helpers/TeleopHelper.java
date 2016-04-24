@@ -135,14 +135,18 @@ public class TeleopHelper extends ShakerHelper {
         if (driverJoystick.getDpadLeft()) {
             visionShot.setUseMultipleFrames(false);
             visionShot.setShootAfterAligned(false);
+            visionShot.setQuickLineUpShot(false);
             visionShot.start();
         }
         //OpJoy lb and driveJoy dpad right uses multiple frames to lineup and fire
         if (operatorJoystick.getButtonLB() || driverJoystick.getDpadRight()) {
             visionShot.setUseMultipleFrames(true);
             visionShot.setShootAfterAligned(true);
+            visionShot.setQuickLineUpShot(false);
             visionShot.start();
         }
+        //operator ls button does a quick lineup for those time we want to be fast on firing
+        //THIS HAS YET TO BE TESTED :)
         if (operatorJoystick.getButtonLS()) {
             visionShot.setUseMultipleFrames(true);
             visionShot.setShootAfterAligned(true);
