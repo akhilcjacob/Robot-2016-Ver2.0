@@ -35,7 +35,7 @@ public class DriveStraightAuton extends AutonMode {
                     driveTrain.resetEncoders();
 
                     // raise the arm and continue to the next case
-//                    shooter.setShooterHigh();
+//                    shooter.setHigh();
                     timer.reset();
                     state++;
                 }

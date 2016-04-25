@@ -30,7 +30,13 @@ public class DriveStraightAutomaticLineup extends AutonMode {
                     // intake.setArmAttachmentDown();
                     System.out.println("Drove the first distance");
                     driveTrain.resetEncoders();
-                    shooterArm.setShooterMiddle();
+                    shooterArm.setMiddle();
+                    //wait .3 seconds before continuing to give arm some time to move to location
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     state++;
                 }
                 break;

@@ -36,7 +36,7 @@ public abstract class AbstractShakerShooterArm extends ShakerSubsystem {
         return ShooterHeight.MOVING;
     }
 
-    public void setShooterLow() {
+    public void setLow() {
         // both pistons will be set to true to get max height
         moveShooterPistonsLow();
         if (!getSolenoidState().equals(ShooterHeight.LOW)) {
@@ -45,7 +45,7 @@ public abstract class AbstractShakerShooterArm extends ShakerSubsystem {
         }
     }
 
-    public void setShooterMiddle() {
+    public void setMiddle() {
         // set shooter height to middle meaning only one piston will be true
         moveShooterPistonsMiddle();
         if (!getSolenoidState().equals(ShooterHeight.MID)) {
@@ -54,7 +54,7 @@ public abstract class AbstractShakerShooterArm extends ShakerSubsystem {
         }
     }
 
-    public void setShooterHigh() {
+    public void setHigh() {
         // set shooter height to low, set both pistons to false
         moveShooterPistonsHigh();
         if (!getSolenoidState().equals(ShooterHeight.HIGH)) {

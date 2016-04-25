@@ -40,7 +40,7 @@ public class VisionLineupWithSearch extends AutonMode {
                     // intake.setArmAttachmentDown();
                     System.out.println("Drove the first distance");
                     driveTrain.resetEncoders();
-                    shooterArm.setShooterMiddle();
+                    shooterArm.setMiddle();
                     state++;
                 }
                 break;

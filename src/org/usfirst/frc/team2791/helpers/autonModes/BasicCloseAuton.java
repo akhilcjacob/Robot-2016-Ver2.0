@@ -78,7 +78,7 @@ public class BasicCloseAuton extends AutonMode {
                 if (driveTrain.setAngle(turnToAngle, 0.7)) {
                     // if reached the angle target then reset encoders
                     driveTrain.resetEncoders();
-                    shooterArm.setShooterHigh();
+                    shooterArm.setHigh();
                     // continue to the next case
                     state++;
                     System.out.println("Finsihed turn now going to drive " + secondDistance);

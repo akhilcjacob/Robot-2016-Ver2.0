@@ -18,15 +18,15 @@ public class IntakeAndShooterSynergy {
             //then act accordingly becasue intake isn't  in the way.
             if (operatorJoystick.getDpadUp() || position == ShooterHeight.HIGH) {
                 shooterWheels.shooterArmMoving();
-                shooterArm.setShooterHigh();
+                shooterArm.setHigh();
             }
             if (operatorJoystick.getDpadRight() || position == ShooterHeight.MID) {
                 shooterWheels.shooterArmMoving();
-                shooterArm.setShooterMiddle();
+                shooterArm.setMiddle();
             }
             if (operatorJoystick.getDpadDown() || position == ShooterHeight.LOW) {
                 shooterWheels.shooterArmMoving();
-                shooterArm.setShooterLow();
+                shooterArm.setLow();
                 shooterWheels.resetShooterFlags();
             }
         } else if (intake.getIfRetracted()) {
