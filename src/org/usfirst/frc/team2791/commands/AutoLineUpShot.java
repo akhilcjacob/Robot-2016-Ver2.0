@@ -89,8 +89,6 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
 
     public void start() {
         if (!running) {
-            //makes sure everything is fresh
-            reset();
             //sets the running boolean to true
             running = true;
             //puts camera into manual mode meaning take frame by frame when requested

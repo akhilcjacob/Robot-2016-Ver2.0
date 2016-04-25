@@ -16,6 +16,7 @@ public class VisionLineupWithSearch extends AutonMode {
     private double multiplier = -1;
     private double angle = 30;
     private Timer visionLineUpTimer;
+    private double angleTurnAccum = 0;
 
     public VisionLineupWithSearch(double distance, double turnAngle) {
         firstDistance = distance;
@@ -72,11 +73,12 @@ public class VisionLineupWithSearch extends AutonMode {
                 //set the drive train to look rightward first then leftward
                 if (driveTrain.setAngle(angle *= multiplier, 0.65, false, true)) {
                     state = 4;
+                    angleTurnAccum = angle;
                 }
                 break;
             case 7:
                 //zero the angle
-                if (driveTrain.setAngle(0, 0.65, false, true))
+                if (driveTrain.setAngle(-angleTurnAccum, 0.65, false, true))
                     state++;
                 break;
             case 8:
