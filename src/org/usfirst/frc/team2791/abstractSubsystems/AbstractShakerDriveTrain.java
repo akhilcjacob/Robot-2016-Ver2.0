@@ -1,6 +1,6 @@
 package org.usfirst.frc.team2791.abstractSubsystems;
 
-import edu.wpi.first.wpilibj.ControllerPower;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Timer;
@@ -198,8 +198,10 @@ public class AbstractShakerDriveTrain extends ShakerSubsystem implements Runnabl
         //takes in input as voltages and uses current voltage state to vary output accordingly
         leftVoltage *= 12;
         rightVoltage *= 12;
-        leftVoltage /= ControllerPower.getInputVoltage();
-        rightVoltage /= ControllerPower.getInputVoltage();
+        //this reads the current voltage and then sets based on reading
+        //used to be divided by ControllerPower.getInputVoltage() --> DriverStation.getInstance().getBatteryVoltage()
+        leftVoltage /= DriverStation.getInstance().getBatteryVoltage();
+        rightVoltage /= DriverStation.getInstance().getBatteryVoltage();
         setLeftRight(leftVoltage, rightVoltage);
     }
 
