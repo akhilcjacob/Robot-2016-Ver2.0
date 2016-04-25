@@ -50,6 +50,7 @@ public class DriveStraightAutomaticLineup extends AutonMode {
             case 4:
                 visionShot.setShootAfterAligned(true);
                 visionShot.setUseMultipleFrames(true);
+                visionShot.setQuickLineUpShot(false);
                 visionShot.start();
                 System.out.println("Starting autoLineup");
                 state++;
@@ -58,8 +59,7 @@ public class DriveStraightAutomaticLineup extends AutonMode {
                 if (!AutoLineUpShot.isRunning()) {
                     state++;
                     System.out.println("Auto lineup is no longer running and finishing up");
-                } else
-                    visionShot.run();
+                }
                 break;
             case 6:
                 visionShot.reset();

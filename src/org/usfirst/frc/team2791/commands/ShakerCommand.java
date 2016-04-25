@@ -5,8 +5,10 @@ package org.usfirst.frc.team2791.commands;
  * This class acts as template for any command class
  */
 public abstract class ShakerCommand {// template class for commands
+
     //Variable tells whether or not the command is running
     protected static boolean running;
+    protected static int counter;
 
     //returns whether the class is running
     static boolean isRunning() {

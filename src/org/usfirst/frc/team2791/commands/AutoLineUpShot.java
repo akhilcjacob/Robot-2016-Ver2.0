@@ -1,259 +1,145 @@
 package org.usfirst.frc.team2791.commands;
 
+
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import org.usfirst.frc.team2791.util.ShakerCamera.ParticleReport;
+import org.usfirst.frc.team2791.util.ShakerCamera;
 
 import static org.usfirst.frc.team2791.robot.Robot.*;
 
 /**
- * Created by Akhil on 1/28/2016.
- * This class uses vision processing to automatically line up the robot
- * with the target
+ * Created by Akhil on 4/27/2016.
+ * This is the code that uses the values from the camera to turn and lineup and fire
  */
 public class AutoLineUpShot extends ShakerCommand implements Runnable {
+    //This will decide which case to run
+    private static final int STAGE_ONE = 0;
+    //use one frame to lineup to the target and shoot
+    private static final int SINGLE_FRAME_SHOT = 1;
+    //single frame no shoot
+    private static final int SINGLE_FRAME_LINEUP = 2;
+    //multiple frames and shoot
+    private static final int MULTIPLE_FRAME_SHOOT = 3;
+    //special case after shooting
+    private static final int AFTER_SHOT_CLEANUP = 4;
+    //reset for anything than ran
+    private static final int GENERAL_RESET = 5;
     private static final double angleMaxOutput = 0.6;
+    //Settings
     // to correct any curving of the shot leftward or right ward
     public static double shootOffset = 0.5;
-    // this is the counter that decides what stop to run in the auto lineup
-    // process
-    private static int autoLineUpCounter = 0;
-    // target angle during the entire process
-    private static double target = 0;
-    // just to count how many frames we used to lineup
-    private static int frames_used = 0;
-    private static ParticleReport currentTarget;
-    private static Timer totalTime = new Timer();
-
+    //Run method flags
     private static boolean useMultipleFrames = false;
     private static boolean shootAfterAligned = false;
     private static boolean quickLineUpShot = false;
+    //internal values
+    private double targetTurnAngle = 0;
+    private ShakerCamera.ParticleReport currentTarget;
+    private Timer totalTime;
+    private double frames_used = 0;
 
     public AutoLineUpShot() {
-
+        totalTime = new Timer();
     }
 
-    private static void resetAndStartTimer() {
-        totalTime.reset();
-        totalTime.start();
-    }
-
+    /**************
+     * End Internal run methods
+     ****************/
     public static boolean isRunning() {
         return running;
     }
 
-    public void setUseMultipleFrames(boolean value) {
-        useMultipleFrames = value;
-    }
-
-    public void setShootAfterAligned(boolean value) {
-        shootAfterAligned = value;
-    }
-
-    public void setQuickLineUpShot(boolean value) {
-        /*
-        This method makes the double check camera error much higher so the botis less accurate but shoots earlier
-         */
-        quickLineUpShot = value;
-    }
-
-    public boolean setUseMultipleFrames() {
-        return useMultipleFrames;
-    }
-
-    public boolean setShootAfterAligned() {
-        return shootAfterAligned;
-    }
-
-    public void overrideAutoLineUp() {
-        autoLineUpCounter = 30;
-    }
-
-    public void reset() {
-        //This sets the camera to automatically update to the dash again
-        camera.setAutomaticCaptureAndUpdate();
-        //restart the totalTime that counts how long the whole process takes
-        resetAndStartTimer();
-        //set the running flag to false
-        running = false;
-        //reset the counter
-        autoLineUpCounter = 0;
-        //stop all shooter stuff
-        shooterWheels.resetShooterFlags();
-        //run method flags
-        useMultipleFrames = false;
-        shootAfterAligned = false;
-        quickLineUpShot = false;
-        driveTrain.forceBreakPID();
-    }
-
-    public void start() {
-        if (!running) {
-            //makes sure everything is fresh
-            reset();
-            //sets the running boolean to true
-            running = true;
-            //puts camera into manual mode meaning take frame by frame when requested
-            camera.setManualCapture();
-            //actually run the code... this should run on its own thread
-            run();
-        }
-    }
-
-    @Override
-    public void updateSmartDash() {
-
-    }
-
-    @Override
-    public void debug() {
-
-    }
+    /***
+     * INTERNAL RUN METHODS
+     ****/
 
     public void run() {
         while (running) {
-            SmartDashboard.putNumber("Auto Line Up step: ", autoLineUpCounter);
-            //this waits on the camera thread for the new image to be gotten and processed
-
-            switch (autoLineUpCounter) {
+            SmartDashboard.putNumber("Vision Shot stage: ", counter);
+            switch (counter) {
                 default:
-                case 0:
-                    // only run if there is a target available
+                case STAGE_ONE:
+                    //reset the number of frames that have been used
+                    frames_used = 0;
+                    //get a new frame
                     reUpdateCurrentTarget();
+                    //reset encoders because that is what we used to turn
                     driveTrain.resetEncoders();
-
-                        /*prep the shot, runs the shooter wheels to setpoint
-                        saves time in firing the useMultipleFrames is there because we always fire if
-                        we're using multiple frames*/
+                /*prep the shot, runs the shooter wheels to setpoint
+                  saves time in firing the useMultipleFrames is there because we always fire if
+                  we're using multiple frames*/
                     if (shootAfterAligned || useMultipleFrames)
                         shooterWheels.prepShot();
-
-                    // the target angle == current angle + targetAngleDiff + offset
-                    target = driveTrain.getAngle() + currentTarget.optimalTurnAngle + shootOffset;
-                    // Print out the values for debugging
-                    System.out.print("Last System Out was " + totalTime.get());
-                    System.out.println("my target is " + target + " current angle is " + driveTrain.getAngle()
-                            + "the shooter offset is " + shootOffset + " t:" + totalTime.get());
-                    resetAndStartTimer();
-                    // we used one frame so far
-                    frames_used = 1;
-                    // go to next step after this
+                /*This decides what case to call depending on
+                the flags that are set true;
+                 */
                     if (useMultipleFrames) {
-                        if (shootAfterAligned) {
-                            autoLineUpCounter = 20; // this is the double check and
-                            // shoot case
-                        } else {
-
+                        if (shootAfterAligned)
+                            counter = MULTIPLE_FRAME_SHOOT;
+                        else {
                             System.out.println(
                                     "We have no code to line up with multiple frame and not shoot. Shooting anyway. t:"
                                             + totalTime.get());
-                            autoLineUpCounter = 20;
-                            resetAndStartTimer();
+                            counter = 20;
                         }
                     } else {
-                        if (shootAfterAligned) {
-                            autoLineUpCounter = 10; // use 1 frame and shoot
-                        } else {
-                            autoLineUpCounter = 15; // use 1 frame and don't shoot
-                        }
+                        if (shootAfterAligned) counter = SINGLE_FRAME_SHOT;
+                        else counter = SINGLE_FRAME_LINEUP;
                     }
-
-
+                    totalTime.reset();
+                    totalTime.start();
+                    debugSystemOut();
                     break;
 
-                case 10: // this is the single line up and shoot case
-                    // set the drive train to the target angle, will return true when
-                    // reached there
-                    if (driveTrain.setAngle(target, angleMaxOutput, true, true) && shooterWheels.shooterAtSpeed()) {
-                        // for debugging
+                case SINGLE_FRAME_SHOT:
+                    //uses the single frame and fires
+                    if (driveTrain.setAngle(targetTurnAngle, angleMaxOutput, true, true)) {
+                        //after the desired angle is reached it will do a complete shot
                         shooterWheels.completeShot();
-
-                        System.out.print("Last System Out was " + totalTime.get());
-                        System.out.println("I'm trying to get to " + target + " I got to " + driveTrain.getAngle()
-                                + "\n    angle-target= " + (driveTrain.getAngle() - target));
-                        autoLineUpCounter = 30;
+                        debugSystemOut();
+                        counter = AFTER_SHOT_CLEANUP;
                     }
-                    //
                     break;
-
-                case 15: // this is the single line up and don't shoot case
-                    if (driveTrain.setAngle(target, angleMaxOutput, true, true)) {
-                        // for debugging
-
-                        System.out.print("Last System Out was " + totalTime.get());
-                        System.out.println("I'm trying to get to " + target + " I got to " + driveTrain.getAngle()
-                                + "\n    angle-target= " + (driveTrain.getAngle() - target));
-                        autoLineUpCounter = 40;
+                case SINGLE_FRAME_LINEUP:
+                    if (driveTrain.setAngle(targetTurnAngle, angleMaxOutput, true, true)) {
+                        debugSystemOut();
+                        counter = GENERAL_RESET;
                     }
-
                     break;
-
-                case 20:
-                    // here we check if our current angele is good enough
-                    // if now we reset out target using the latest camera image
-                    // and try to drive to it
-                    System.out.println("I'm trying to get to " + target + " I got to " + driveTrain.getAngle()
-                            + "\n    angle-target= " + (driveTrain.getAngle() - target));
-                    reUpdateCurrentTarget();
-                    frames_used++;
-
-                    // double check that we are close to the target angle
-                    // if we got a new frame process it
-                    double camera_error = currentTarget.optimalTurnAngle + shootOffset;
-                    System.out.println("Double check camera error: " + camera_error);
-                    // if error is minimal shoot
-                    //if quick lineup is toggled it allows the bot to be done quicker rather than more accurate
-                    double cameraErrorThreshold = 0.75;
-                    if (quickLineUpShot)
-                        cameraErrorThreshold = 1.5;//TODO mess with this value
-
-                    if (Math.abs(camera_error) < cameraErrorThreshold && shooterWheels.shooterAtSpeed()) {
-                        // go to the next step
-                        // shoot whenever ready
-                        System.out.println(
-                                "I've found a good angle and am going to busy it while the shooter spins up. t:"
-                                        + totalTime.get());
-                        shooterWheels.completeShot();
-                        // we should be firing when the auto fire method is
-                        // called
-                        // the state we jump to will busy our angle until
-                        // the auto fire method
-                        // is completed
-                        autoLineUpCounter = 30;
-                    } else {
-                        if (!shooterWheels.shooterAtSpeed()) {
-                            System.out.println("I am waiting on the shooter wheels t:" + totalTime.get());
-                        }
-                        if (!(Math.abs(camera_error) < cameraErrorThreshold)) {
+                case MULTIPLE_FRAME_SHOOT:
+                    if (driveTrain.setAngle(targetTurnAngle, angleMaxOutput, true, true)) {
+                        reUpdateCurrentTarget();
+                        double camera_error = currentTarget.optimalTurnAngle + shootOffset;
+                        double camera_error_threshold = 0.75;
+                        if (quickLineUpShot)
+                            camera_error_threshold = 1.5;
+                        if (Math.abs(camera_error) < camera_error_threshold) {
+                            System.out.println(
+                                    "I've found a good angle and am going to busy it while the shooter spins up. t:"
+                                            + totalTime.get());
+                            shooterWheels.completeShot();
+                            counter = AFTER_SHOT_CLEANUP;
+                        } else if (!(Math.abs(camera_error) < camera_error_threshold)) {
                             System.out.println("I am waiting on camera error t:" + totalTime.get());
+                            //the error is still greater than the thresh so update then angle value
+                            targetTurnAngle = driveTrain.getAngle() + currentTarget.optimalTurnAngle + shootOffset;
+
                         }
-                        // too much error so we're going to drive again
-                        // update the target and the setAngle in the if
-                        // statement in the top of
-                        // this method will move us
-                        target = driveTrain.getAngle() + currentTarget.optimalTurnAngle + shootOffset;
                     }
-
-                    break;
-
-                case 30:
+                case AFTER_SHOT_CLEANUP:
                     // keep the same angle until we are done shooting
-                    if (driveTrain.setAngle(target, angleMaxOutput) && shooterWheels.shooterAtSpeed()) {
+                    if (driveTrain.setAngle(targetTurnAngle, angleMaxOutput, true, true)) {
                         if (!shooterWheels.getIfCompleteShot()) {
-                            // only run once the shot is finished
-
-                            System.out.println("done shooting t:" + totalTime.get());
-                            // if done running go to the next step
-                            autoLineUpCounter = 40;
+                            System.out.println("Done shooting t:" + totalTime.get());
+                            //once we are done shooting do a reset
+                            counter = GENERAL_RESET;
                         }
                     }
                     break;
-
-                case 40:
+                case GENERAL_RESET:
                     // reset everything
                     System.out.println("Finished auto line up and resetting. t:" + totalTime.get());
-                    // the fames_used + 1 is to include the check frame
-                    System.out.println("I took " + (frames_used + 1) + " frames to shoot");
+                    System.out.println("I took " + frames_used + " frames to shoot");
                     reset();
                     break;
             }
@@ -279,9 +165,74 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
             }
         }
         currentTarget = camera.getTarget();
+        frames_used++;
         if (currentTarget == null) {
             System.out.println("Target Reports are empty so aborting.");
-            autoLineUpCounter = 40;
+            counter = 40;
+            return;
+        } else
+            // the target angle == current angle + targetAngleDiff + offset
+            targetTurnAngle = driveTrain.getAngle() + currentTarget.optimalTurnAngle + shootOffset;
+
+    }
+
+    private void debugSystemOut() {
+        System.out.print("TimeStamp: " + totalTime.get());
+        System.out.println(" My target is: " + targetTurnAngle + " Current angle is: " + driveTrain.getAngle()
+                + " Shooter offset is: " + shootOffset);
+
+    }
+
+    public void setUseMultipleFrames(boolean value) {
+        //This will use multiple frames to lineup and fire
+        useMultipleFrames = value;
+    }
+
+    public void setShootAfterAligned(boolean value) {
+        //this will control whether to shoot after the lineup
+        shootAfterAligned = value;
+    }
+
+    public void setQuickLineUpShot(boolean value) {
+        //increases the camera error on the mutipleframe case for faster lineup
+        quickLineUpShot = value;
+    }
+
+    public void start() {
+        if (!running) {
+            //sets the running boolean to true
+            running = true;
+            //puts camera into manual mode meaning take frame by frame when requested
+            camera.setManualCapture();
+            //actually run the code... this should run on its own thread
+            run();
         }
+    }
+
+    public void reset() {
+        //This sets the camera to automatically update to the dash again
+        camera.setAutomaticCaptureAndUpdate();
+        //restart the totalTime that counts how long the whole process takes
+        totalTime.reset();
+        totalTime.stop();
+        //set the running flag to false
+        running = false;
+        //reset the counter
+        counter = STAGE_ONE;
+        //stop all shooter stuff
+        shooterWheels.resetShooterFlags();
+        //run method flags
+        useMultipleFrames = false;
+        shootAfterAligned = false;
+        quickLineUpShot = false;
+        driveTrain.forceBreakPID();
+    }
+
+    public void updateSmartDash() {
+        //This wasn't necessary either because we chose to spam System.out with info
+    }
+
+    public void debug() {
+        //There was really nothing to put here....cuz who needs debugging
     }
 }

@@ -190,7 +190,6 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
             retractServoArm();
             stopMotors();
             overrideShot = false;
-
             System.out.println("Finishing autofire");
         } else {
             System.out.println("The shot was calceled");
