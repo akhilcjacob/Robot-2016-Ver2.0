@@ -65,22 +65,22 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
                     reUpdateCurrentTarget();
                     //reset encoders because that is what we used to turn
                     driveTrain.resetEncoders();
-                /*prep the shot, runs the shooter wheels to setpoint
-                  saves time in firing the useMultipleFrames is there because we always fire if
-                  we're using multiple frames*/
+                    /*prep the shot, runs the shooter wheels to setpoint
+                      saves time in firing the useMultipleFrames is there because we always fire if
+                      we're using multiple frames*/
                     if (shootAfterAligned || useMultipleFrames)
                         shooterWheels.prepShot();
-                /*This decides what case to call depending on
-                the flags that are set true;
-                 */
+                    /*This decides what case to call depending on
+                    the flags that are set true;
+                     */
                     if (useMultipleFrames) {
                         if (shootAfterAligned)
                             counter = MULTIPLE_FRAME_SHOOT;
                         else {
+                            printTimeStamp();
                             System.out.println(
-                                    "We have no code to line up with multiple frame and not shoot. Shooting anyway. t:"
-                                            + totalTime.get());
-                            counter = 20;
+                                    "We have no code to line up with multiple frame and not shoot. Shooting anyway.");
+                            counter = MULTIPLE_FRAME_SHOOT;
                         }
                     } else {
                         if (shootAfterAligned) counter = SINGLE_FRAME_SHOT;
@@ -114,23 +114,26 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
                         if (quickLineUpShot)
                             camera_error_threshold = 1.5;
                         if (Math.abs(camera_error) < camera_error_threshold) {
+                            printTimeStamp();
                             System.out.println(
-                                    "I've found a good angle and am going to busy it while the shooter spins up. t:"
-                                            + totalTime.get());
+                                    "I've found a good angle and am going to busy it while the shooter spins up.");
                             shooterWheels.completeShot();
                             counter = AFTER_SHOT_CLEANUP;
                         } else if (!(Math.abs(camera_error) < camera_error_threshold)) {
-                            System.out.println("I am waiting on camera error t:" + totalTime.get());
+                            printTimeStamp();
+                            System.out.println("I am waiting on camera error");
                             //the error is still greater than the thresh so update then angle value
                             targetTurnAngle = driveTrain.getAngle() + currentTarget.optimalTurnAngle + shootOffset;
 
                         }
                     }
+                    break;
                 case AFTER_SHOT_CLEANUP:
                     // keep the same angle until we are done shooting
                     if (driveTrain.setAngle(targetTurnAngle, angleMaxOutput, true, true)) {
                         if (!shooterWheels.getIfCompleteShot()) {
-                            System.out.println("Done shooting t:" + totalTime.get());
+                            printTimeStamp();
+                            System.out.println("Done shooting");
                             //once we are done shooting do a reset
                             counter = GENERAL_RESET;
                         }
@@ -138,10 +141,16 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
                     break;
                 case GENERAL_RESET:
                     // reset everything
-                    System.out.println("Finished auto line up and resetting. t:" + totalTime.get());
+                    printTimeStamp();
+                    System.out.println("Finished auto line up and resetting.");
                     System.out.println("I took " + frames_used + " frames to shoot");
                     reset();
                     break;
+            }
+            try {
+                Thread.sleep(100);//Run @ a 100 hz
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -176,8 +185,12 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
 
     }
 
-    private void debugSystemOut() {
+    private void printTimeStamp() {
         System.out.print("TimeStamp: " + totalTime.get());
+    }
+
+    private void debugSystemOut() {
+        printTimeStamp();
         System.out.println(" My target is: " + targetTurnAngle + " Current angle is: " + driveTrain.getAngle()
                 + " Shooter offset is: " + shootOffset);
 

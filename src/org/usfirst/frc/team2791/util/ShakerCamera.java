@@ -86,24 +86,25 @@ public class ShakerCamera implements Runnable {
                         NIVision.GetImageSizeResult imageSize = NIVision.imaqGetImageSize(frame);
                         frameWidth = imageSize.width;
                         frameHeight = imageSize.height;
-                        if (SmartDashboard.getBoolean("Debug Image")) {
-                            //If the robot is in debugging image mode show the camera image
-                            measureAndGetParticles();
-                            drawCrossHairs();
-                            CameraServer.getInstance().setImage(binaryFrame);
-                        }
+                        if (!imageDebug())
+                            CameraServer.getInstance().setImage(frame);
                     }
                 } else {
-                    if (updateAndGetNewFrame) {
+                    if (updateAndGetNewFrame || SmartDashboard.getBoolean("Debug Image")) {
                         synchronized (this) {
                             System.out.println("Grabbing new frame and processing");
                             updateAndGetNewFrame = false;
                             camera.getImage(frame);
+                            NIVision.GetImageSizeResult imageSize = NIVision.imaqGetImageSize(frame);
+                            frameWidth = imageSize.width;
+                            frameHeight = imageSize.height;
                             target = internalGetTarget();
+                            imageDebug();
                             notify();
                         }
                     }
                 }
+                //Switch between manual and automatic exposure
                 if (automaticCaptureAndUpdate) {
                     if (switchMode) {
                         if (!manualMode) {
@@ -129,6 +130,19 @@ public class ShakerCamera implements Runnable {
     /******************
      * INTERNAL RUN METHODS
      ****************/
+    private boolean imageDebug() {
+        // This puts debugging image on the dashboard
+        if (SmartDashboard.getBoolean("Debug Image")) {
+            //If the robot is in debugging image mode show the camera image
+            getTarget().displayToDashboard();
+            //Draws cross hairs for easier visualization
+            drawCrossHairs();
+            //sets the camera server to put the image on
+            CameraServer.getInstance().setImage(binaryFrame);
+            return true;
+        }
+        return false;
+    }
 
     private void firstTimeRunInit() {
         //This is everything that needs to be run the first time on the run method
@@ -338,6 +352,18 @@ public class ShakerCamera implements Runnable {
         double BoundingRectBottom;
         double CenterOfMassX;
         double CenterOfMassY;
+
+        public void displayToDashboard() {
+            SmartDashboard.putNumber("Optimal Turn Angle(Theta diff):", optimalTurnAngle);
+            SmartDashboard.putNumber("Percent Area to Image Area:", PercentAreaToImageArea);
+            SmartDashboard.putNumber("Particle Area:", Area);
+            SmartDashboard.putNumber("Bounding Rect Left ", BoundingRectLeft);
+            SmartDashboard.putNumber("Bounding Rect Top ", BoundingRectTop);
+            SmartDashboard.putNumber("Bounding Rect Right ", BoundingRectRight);
+            SmartDashboard.putNumber("Bounding Rect Bottom ", BoundingRectBottom);
+            SmartDashboard.putNumber("Center Of Mass X ", CenterOfMassX);
+            SmartDashboard.putNumber("Center of Mass Y ", CenterOfMassY);
+        }
     }
 }
 
