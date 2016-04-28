@@ -50,6 +50,8 @@ public class TeleopHelper extends ShakerHelper {
         sharedControls();
         //class deals with prevention of collision between intake and shooter
         IntakeAndShooterSynergy.run();
+        //This deals with lights, turns them on when certain shooter functions are running
+        lightController();
     }
 
     private void driverControls() {
@@ -86,6 +88,8 @@ public class TeleopHelper extends ShakerHelper {
             // Run intake inward with assistance of the shooter wheel
             shooterWheels.setToggledShooterSpeeds(-0.6, false);
             intake.pullBall();
+            //if the shooter has the ball it will set the lights to flash for 2 seconds
+            lights.setHasBall(shooterWheels.hasBall());
         } else if (operatorJoystick.getButtonX()) {
             // Run reverse if button pressed
             shooterWheels.setToggledShooterSpeeds(0.6, false);
@@ -95,7 +99,9 @@ public class TeleopHelper extends ShakerHelper {
             shooterWheels.setToggledShooterSpeeds(operatorJoystick.getAxisRT() - operatorJoystick.getAxisLT(), false);
             intake.stopMotors();
         }
-
+        if (operatorJoystick.getButtonA()) {
+            shooterWheels.completeShot();
+        }
         //This switches between automatic and manual mode on the camera
         if (operatorJoystick.getButtonSel()) {
             camera.switchMode();
@@ -120,6 +126,11 @@ public class TeleopHelper extends ShakerHelper {
         //constantly checks if either driver/op hit vision shot
         configureVisionShot();
 
+    }
+
+    private void lightController() {
+        lights.setPreppingShot(shooterWheels.getIfPreppingShot());
+        lights.setShooting(shooterWheels.getIfCompleteShot());
     }
 
     private void compressorController() {

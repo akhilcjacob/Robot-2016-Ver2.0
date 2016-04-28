@@ -21,6 +21,7 @@ import org.usfirst.frc.team2791.shakerJoystick.Driver;
 import org.usfirst.frc.team2791.shakerJoystick.Operator;
 import org.usfirst.frc.team2791.util.Constants;
 import org.usfirst.frc.team2791.util.ShakerCamera;
+import org.usfirst.frc.team2791.util.ShakerLights;
 
 public class Robot extends IterativeRobot {
     public static final boolean COMPETITION_ROBOT = true;
@@ -49,6 +50,8 @@ public class Robot extends IterativeRobot {
     // helpers
     private TeleopHelper teleopHelper;
     private AutonHelper autonHelper;
+    //LIGHTS!!!!!!!!!
+    public static ShakerLights lights;
 
     // MAIN ROBOT CODE
     public void robotInit() {
@@ -89,6 +92,9 @@ public class Robot extends IterativeRobot {
 
         visionShot = new AutoLineUpShot();
         AutoLineUpThread = new Thread(visionShot);
+
+        lights = new ShakerLights();
+        new Thread(lights);
 
         autonHelper = AutonHelper.getInstance();
         teleopHelper = TeleopHelper.getInstance();
