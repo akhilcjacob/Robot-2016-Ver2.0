@@ -36,10 +36,11 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
     private boolean cancelShot = false;
     private boolean overrideShot = false;
     private boolean shooterArmMoving = false;
+    private boolean prepShotAfterShooterArm = false;
     //if shooter wheels are busy(with pid)they wont be interuptted
     private boolean busy = false;
     //completeShot timer
-    private Timer completeShotTimer;
+
 
     public AbstractShakerShooterWheels() {
         System.out.println("New instance of shooterWheels created.");
@@ -89,8 +90,7 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
         // put setpoints on the dashboard
         SmartDashboard.putNumber("closeShotSetpoint", closeShotSetPoint);
         SmartDashboard.putNumber("farShotSetpoint", farShotSetpoint);
-        //misc.
-        completeShotTimer = new Timer();
+
     }
 
     public void run() {
@@ -104,7 +104,7 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
             double setPoint = internalGetSetPoint();
             if (prepShot) {
                 internalPrepShot(setPoint);
-                prepShot = false;
+                prepShotAfterShooterArm = false;
                 cancelShot = false;
             }
             if (completeShot) {
@@ -121,9 +121,11 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
      */
     private void internalShooterArmMoving() {
         //if the shooter arm is moving then run the wheels inward
-        double tempTime = Timer.getFPGATimestamp();
+        Timer tempTimer = new Timer();
+        tempTimer.reset();
+        tempTimer.start();
         //run it inward for .4s
-        while (Timer.getFPGATimestamp() - tempTime < 0.4) {
+        while (tempTimer.get() < 0.4) {
             setToggledShooterSpeeds(-0.7, false);
             //if shooter is busy break out of this b/c it isnt as important
             if (busy)
@@ -131,6 +133,8 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
         }
         stopMotors();
         shooterArmMoving = false;
+        if (prepShotAfterShooterArm)
+            prepShot = true;
     }
 
     private double internalGetSetPoint() {
@@ -145,24 +149,38 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
         setShooterSpeeds(setPoint, true);
         if (overrideShot || completeShot || cancelShot) {
             System.out.println("Finished prepping the shot");
+            if (!completeShot)
+                prepShot = false;
         }
     }
 
     private void internalAutoFire(double setPoint) {
         System.out.println("Auto Firing starting");
+        Timer completeShotTimer = new Timer();
         // set the shooter speeds to the set point using pid
         setShooterSpeeds(setPoint, true);
         //zero the timer
         completeShotTimer.reset();
-        //make sure that the pid is good, for at least 0.2 ms
-        while (!shooterAtSpeed() && completeShotTimer.get() > 0.2) {
+        completeShotTimer.start();
+        //make sure that the pid is good, for at least 0.2 s
+        while (completeShotTimer.get() < 0.2) {
             // if the wheels aren't at speed reset the timer
             if (!shooterAtSpeed()) {
                 completeShotTimer.reset();
                 completeShotTimer.start();
+                /* if the prepshot override was there(basically if we attempt to shoot after prepshot) and we werent
+                    at the setpoint the we will follow the regular .2 s error check */
+                prepShot = false;
+            } else if (prepShot) {
+                /*if we prepped the shot then we probably are at the setpoint already
+                This is in the else if statement of the error checking if statment so that we are 100%
+                sure we reached the setpoint */
+                break;
             }
+            // set the shooter speeds to the set point using pid
+            setShooterSpeeds(setPoint, true);
             //if overridden or canceled go to the next thing
-            if (overrideShot || cancelShot)
+            if (overrideShot || cancelShot || prepShot)
                 break;
         }
         //if the shot hasn't been canceled continue
@@ -180,7 +198,7 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
             }
             completeShotTimer.reset();
             completeShotTimer.start();
-            while (completeShotTimer.get() < 0.5) {
+            while (completeShotTimer.get() < 0.4) {
                 //hold the shooter wheels at the setpoint a few seconds after
                 //the servo push to maintain accuracy
                 setShooterSpeeds(setPoint, true);
@@ -208,6 +226,8 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
         overrideShot = false;
         prepShot = false;
         cancelShot = true;
+        shooterArmMoving = false;
+        prepShotAfterShooterArm = false;
     }
 
     public void completeShot() {
@@ -228,6 +248,16 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
     public void shooterArmMoving() {
         //this flag runs the wheels inward so it sucks the ball in
         shooterArmMoving = true;
+    }
+
+    /**
+     * This method tells the shooter wheels to run prepshot right after running the shooter arm moving command.
+     * The shooter arm moving command runs the wheels inward for a few seconds to make sure the ball securely
+     * in the shooter. Then prepshot, this should theortically get the shot ready right when we need to fire
+     */
+    public void shooterArmMoveAndPrepShot() {
+        shooterArmMoving = true;
+        prepShotAfterShooterArm = true;
     }
 
     public boolean getIfPreppingShot() {
