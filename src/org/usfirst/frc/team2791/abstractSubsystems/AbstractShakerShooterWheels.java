@@ -111,6 +111,8 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
                 internalAutoFire(setPoint);
                 resetShooterFlags();
                 stopMotors();
+                //TODO look at possibly doing this but make sure to remove this out of the vision shot code if so
+//                IntakeAndShooterSynergy.setPosition(AbstractShakerShooterArm.ShooterHeight.LOW);
             }
 
         }
