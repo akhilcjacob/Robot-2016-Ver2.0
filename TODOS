@@ -1,0 +1,6 @@
+Things to look at for competition:
+    - When lights are working add the light ports in
+    - Also have the shooter flags reset when the driver moves but need lights on or else driver wont know we are firing
+    - Maybe have shooter drop automatically after shooting
+    - Try the new quickshot mode in the new version of the visionlineup(increases the error)
+    - If we are not y cabling the talons then use talon set class, and put real values in there
