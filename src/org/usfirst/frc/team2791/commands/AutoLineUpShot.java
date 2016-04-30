@@ -3,6 +3,7 @@ package org.usfirst.frc.team2791.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import org.usfirst.frc.team2791.abstractSubsystems.AbstractShakerShooterArm;
 import org.usfirst.frc.team2791.util.ShakerCamera;
 
 import static org.usfirst.frc.team2791.robot.Robot.*;
@@ -132,8 +133,9 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
                     if (driveTrain.setAngle(targetTurnAngle, angleMaxOutput, true, true)) {
                         if (!shooterWheels.getIfCompleteShot()) {
                             printTimeStamp();
-                            System.out.println("Done shooting");
+                            System.out.println("Done shooting and bringing arm down");
                             //once we are done shooting do a reset
+                            IntakeAndShooterSynergy.setPosition(AbstractShakerShooterArm.ShooterHeight.LOW);
                             counter = GENERAL_RESET;
                         }
                     }

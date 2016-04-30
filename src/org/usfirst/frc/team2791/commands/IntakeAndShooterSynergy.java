@@ -73,5 +73,8 @@ public class IntakeAndShooterSynergy {
 
     }
 
+    public static void setPosition(ShooterHeight height) {
+        position = height;
+    }
 
 }
