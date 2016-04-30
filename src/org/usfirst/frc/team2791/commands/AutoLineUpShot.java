@@ -115,8 +115,8 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
                             camera_error_threshold = 1.5;
                         if (Math.abs(camera_error) < camera_error_threshold) {
                             printTimeStamp();
-                            System.out.println(
-                                    "I've found a good angle and am going to busy it while the shooter spins up.");
+                            System.out.println("I've found a good angle and am " +
+                                    "going to busy it while the shooter spins up.");
                             shooterWheels.completeShot();
                             counter = AFTER_SHOT_CLEANUP;
                         } else if (!(Math.abs(camera_error) < camera_error_threshold)) {
@@ -124,7 +124,6 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
                             System.out.println("I am waiting on camera error");
                             //the error is still greater than the thresh so update then angle value
                             targetTurnAngle = driveTrain.getAngle() + currentTarget.optimalTurnAngle + shootOffset;
-
                         }
                     }
                     break;

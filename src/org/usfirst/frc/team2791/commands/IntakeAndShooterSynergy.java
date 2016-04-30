@@ -28,7 +28,7 @@ public class IntakeAndShooterSynergy {
                 shooterArm.setLow();
                 shooterWheels.resetShooterFlags();
             }
-        } else if (intake.getIfRetracted()) {
+        } else if (!intake.getIfExtended()) {
             //if the intake is retracted and shooter arm is not moving the run other controls
             //if the operator press the corresponding button to the arm then set the position var
             //that when the intake is extended will cause the arm to move to
@@ -59,13 +59,11 @@ public class IntakeAndShooterSynergy {
         }
 
         if (operatorJoystick.getDpadLeft()) {
-            /*override to release the intake and to extend the intake however it
-            will not work if the shooter arm is moving
+            /*This is the force release of the intake, it will always allow the user to put the intake down
+            whenever they need no matter anything that is going on
             */
-            if (!shooterArm.getIfShooterMoving()) {
-                intake.breakIntakeHold();
-                intake.extendIntake();
-            }
+            intake.breakIntakeHold();
+            intake.extendIntake();
         } else if (operatorJoystick.getButtonB()) {
             //this will force hold the intake for intaking
             intake.extendIntake(true);

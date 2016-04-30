@@ -7,6 +7,7 @@ import static org.usfirst.frc.team2791.robot.Robot.shooterWheels;
 
 /**
  * Created by team2791 on 3/17/2016.
+ * This auton just drive straight, we hope to never have to use this
  */
 public class DriveStraightAuton extends AutonMode {
     public double firstDistance;

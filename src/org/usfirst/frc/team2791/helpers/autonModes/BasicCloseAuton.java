@@ -8,7 +8,7 @@ import static org.usfirst.frc.team2791.robot.Robot.*;
 
 /**
  * Created by team2791 on 3/15/2016.
- * This is a low bar 20 pt auton
+ * This is a low bar 20 pt auton, this really hasnt actually fully worked, but weve never needed it
  */
 public class BasicCloseAuton extends AutonMode {
     private double firstDistance;

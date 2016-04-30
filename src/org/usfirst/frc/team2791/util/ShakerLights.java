@@ -23,32 +23,34 @@ public class ShakerLights implements Runnable {
     }
 
     public void run() {
-        try {
-            if (hasBall) {
-                Timer temp = new Timer();
-                temp.start();
-                while (temp.get() < 2) {
+        while (true) {
+            try {
+                if (hasBall) {
+                    Timer temp = new Timer();
+                    temp.start();
+                    while (temp.get() < 2) {
+                        PortA.set(true);
+                        PortB.set(true);
+                    }
+                    hasBall = false;
+                }
+                if (preppingShot) {
                     PortA.set(true);
+                    PortB.set(false);
+                }
+                if (shooting) {
+                    PortA.set(false);
                     PortB.set(true);
                 }
-                hasBall = false;
+                if (!(hasBall || preppingShot || shooting)) {
+                    PortA.set(false);
+                    PortB.set(false);
+                }
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                run();
             }
-            if (preppingShot) {
-                PortA.set(true);
-                PortB.set(false);
-            }
-            if (shooting) {
-                PortA.set(false);
-                PortB.set(true);
-            }
-            if (!(hasBall || preppingShot || shooting)) {
-                PortA.set(false);
-                PortB.set(false);
-            }
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            run();
         }
     }
 

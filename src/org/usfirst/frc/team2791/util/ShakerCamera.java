@@ -79,17 +79,19 @@ public class ShakerCamera implements Runnable {
         firstTimeRunInit();
         while (true) {
             try {
-                if (automaticCaptureAndUpdate) {
+                //This is automatic capture and update to the dashboard
+                if (automaticCaptureAndUpdate && (!SmartDashboard.getBoolean("Debug Image"))) {
                     camera.getImage(frame);
                     if (frame != null) {
                         //get and update the current size of the image
                         NIVision.GetImageSizeResult imageSize = NIVision.imaqGetImageSize(frame);
                         frameWidth = imageSize.width;
                         frameHeight = imageSize.height;
-                        if (!imageDebug())
-                            CameraServer.getInstance().setImage(frame);
+                        CameraServer.getInstance().setImage(frame);
                     }
-                } else {
+                }
+                //if in debugging mode or using manual update mode(for vision targetting) we take frame by frame
+                else {
                     if (updateAndGetNewFrame || SmartDashboard.getBoolean("Debug Image")) {
                         synchronized (this) {
                             System.out.println("Grabbing new frame and processing");
@@ -136,7 +138,7 @@ public class ShakerCamera implements Runnable {
             //If the robot is in debugging image mode show the camera image
             getTarget().displayToDashboard();
             //Draws cross hairs for easier visualization
-            drawCrossHairs();
+            drawCrossHairs_BinaryFrame();
             //sets the camera server to put the image on
             CameraServer.getInstance().setImage(binaryFrame);
             return true;
@@ -176,7 +178,7 @@ public class ShakerCamera implements Runnable {
     }
 
 
-    private void drawCrossHairs() {
+    private void drawCrossHairs_BinaryFrame() {
         //draws cross hairs for debugging purposes
         NIVision.imaqDrawLineOnImage(binaryFrame, binaryFrame, NIVision.DrawMode.DRAW_VALUE,
                 new NIVision.Point((int) frameWidth / 2, 0), new NIVision.Point((int) frameWidth / 2, (int) frameHeight), 100f);

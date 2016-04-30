@@ -4,6 +4,11 @@ import org.usfirst.frc.team2791.commands.AutoLineUpShot;
 
 import static org.usfirst.frc.team2791.robot.Robot.*;
 
+/**
+ * Created by team2791 on 3/17/2016.
+ * This auton drives straight,turns some angle,then uses vision to shoot
+ * Distance and angle are set via the constructor
+ */
 public class DriveStraightAutomaticLineup extends AutonMode {
     private double firstDistance;
     private double turnToAngle;

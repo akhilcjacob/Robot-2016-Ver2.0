@@ -46,11 +46,6 @@ public class VisionLineupWithSearch extends AutonMode {
                 }
                 break;
             case 3:
-                //LOGIC THAT GOES HERE
-                //if there is no target go 20degrees positive
-                //if still no target then go -20 degrees
-
-            case 4:
                 visionShot.setShootAfterAligned(true);
                 visionShot.setUseMultipleFrames(true);
                 visionShot.start();
@@ -59,8 +54,8 @@ public class VisionLineupWithSearch extends AutonMode {
                 System.out.println("Starting autoLineup");
                 state++;
                 break;
-            case 5:
-                if (camera.getTarget() == null && visionLineUpTimer.get() < 1) {
+            case 4:
+                if (camera.getTarget() == null && !AutoLineUpShot.isRunning() && visionLineUpTimer.get() < 1) {
                     //That means that autolineup probably ran too quickly so do a quick turn
                     //to scan nearby
                     state++;
@@ -69,23 +64,23 @@ public class VisionLineupWithSearch extends AutonMode {
                     System.out.println("Auto lineup is no longer running and finishing up");
                 }
                 break;
-            case 6:
+            case 5:
                 //set the drive train to look rightward first then leftward
                 if (driveTrain.setAngle(angle *= multiplier, 0.65, false, true)) {
                     state = 4;
                     angleTurnAccum = angle;
                 }
                 break;
-            case 7:
+            case 6:
                 //zero the angle
                 if (driveTrain.setAngle(-angleTurnAccum, 0.65, false, true))
                     state++;
                 break;
-            case 8:
+            case 7:
                 if (driveTrain.setDistance(-firstDistance, 0, .65, false, true))
                     state++;
                 break;
-            case 9:
+            case 8:
                 visionShot.reset();
                 System.out.println("I am done with the drive straight auto");
                 driveTrain.resetEncoders();
