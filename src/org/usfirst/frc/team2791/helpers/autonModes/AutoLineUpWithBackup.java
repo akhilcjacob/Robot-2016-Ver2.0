@@ -28,7 +28,7 @@ public class AutoLineUpWithBackup extends AutonMode {
                 state++;
                 break;
             case 2:
-                if (driveTrain.setDistance(firstDistance, 0, 0.65, false, false)) {
+                if (driveTrain.setDistance(firstDistance, 0, maxOutput, false, false)) {
                     // intake.setArmAttachmentDown();
                     System.out.println("Drove the first distance");
                     driveTrain.resetEncoders();
@@ -43,7 +43,7 @@ public class AutoLineUpWithBackup extends AutonMode {
                 }
                 break;
             case 3:
-                if (driveTrain.setAngle(turnToAngle, 0.6)) {
+                if (driveTrain.setAngle(turnToAngle, maxOutput)) {
                     driveTrain.resetEncoders();
                     state++;
                 }
@@ -64,13 +64,19 @@ public class AutoLineUpWithBackup extends AutonMode {
                 }
                 break;
             case 6:
-                if (driveTrain.setDistance(-firstDistance, -turnToAngle, 0.65, false, false)) {
+                if (driveTrain.setAngle(-turnToAngle, maxOutput, false, false)) {
+                    driveTrain.resetEncoders();
                     state++;
                 }
                 break;
             case 7:
+                if (driveTrain.setDistance(-firstDistance, 0, maxOutput, false, false)) {
+                    state++;
+                }
+                break;
+            case 8:
                 visionShot.reset();
-                System.out.println("I am done with the drive striaght auto");
+                System.out.println("I am done with the drive straight auto");
                 driveTrain.resetEncoders();
                 state = 0;
                 break;

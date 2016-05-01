@@ -30,7 +30,7 @@ public class DriveStraightAuton extends AutonMode {
                 state++;
                 break;
             case 2:
-                if (driveTrain.setDistance(firstDistance, 0, 0.6, false, false)) {
+                if (driveTrain.setDistance(firstDistance, 0, maxOutput, false, false)) {
                     System.out.println("Finished driving");
                     // if reached the distance then reset the encoders
                     driveTrain.resetEncoders();

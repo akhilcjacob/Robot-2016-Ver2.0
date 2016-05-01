@@ -5,6 +5,7 @@ package org.usfirst.frc.team2791.helpers.autonModes;
  * template class for any autonmode
  */
 public class AutonMode {
+    protected static double maxOutput = 0.65;
     protected int state = 0;
 
     public void run() {
@@ -17,5 +18,9 @@ public class AutonMode {
 
     public boolean getCompleted() {
         return state == 0;
+    }
+
+    public void setMaxOutput(double max) {
+        maxOutput = max;
     }
 }

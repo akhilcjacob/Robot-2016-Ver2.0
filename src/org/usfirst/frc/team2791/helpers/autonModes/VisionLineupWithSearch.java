@@ -35,7 +35,7 @@ public class VisionLineupWithSearch extends AutonMode {
                 state++;
                 break;
             case 2:
-                if (driveTrain.setDistance(firstDistance, 0, 0.65, false, false)) {
+                if (driveTrain.setDistance(firstDistance, 0, maxOutput, false, false)) {
                     // intake.setArmAttachmentDown();
                     System.out.println("Drove the first distance");
                     driveTrain.resetEncoders();
@@ -64,17 +64,30 @@ public class VisionLineupWithSearch extends AutonMode {
                 break;
             case 5:
                 //set the drive train to look rightward first then leftward
-                if (driveTrain.setAngle(angle *= multiplier, 0.65, false, true)) {
+                if (driveTrain.setAngle(angle *= multiplier, maxOutput, false, true)) {
                     visionLineUpTimer.reset();
                     visionLineUpTimer.start();
                     state = 4;
                 }
                 break;
+            case 6:
+                if (driveTrain.setAngle(-angle, maxOutput, false, true)) {
+                    driveTrain.resetEncoders();
+                    state++;
+                }
+                break;
             case 7:
-                if (driveTrain.setDistance(-firstDistance, -angle, .65, false, true))
+                //dive back the original distance minus some amount just incase not to cross the line
+                if (driveTrain.setDistance(-firstDistance - .75, 0, maxOutput, false, true))
                     state++;
                 break;
             case 8:
+                //turn around
+                if (driveTrain.setAngle(180, maxOutput, false, true)) {
+                    state++;
+                }
+                break;
+            case 9:
                 visionShot.reset();
                 System.out.println("I am done with the drive straight auto");
                 driveTrain.resetEncoders();
