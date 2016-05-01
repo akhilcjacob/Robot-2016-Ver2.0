@@ -85,6 +85,7 @@ public class AutonHelper extends ShakerHelper {
             case 1:
                 //run the auton...
                 overallAuto.run();
+                lightController();
                 if (overallAuto.getCompleted()) {
                     //if completed go to the next case...
                     counter++;
@@ -94,6 +95,11 @@ public class AutonHelper extends ShakerHelper {
                 //we are done with auton...so do nothing
                 break;
         }
+    }
+
+    private void lightController() {
+        lights.setYellowPulse(visionShot.isRunning());
+        lights.setGreenPulse(shooterWheels.getIfCompleteShot());
     }
 
     public void disableRun() {

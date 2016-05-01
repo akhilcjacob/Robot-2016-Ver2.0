@@ -1,7 +1,6 @@
 package org.usfirst.frc.team2791.helpers.autonModes;
 
 import edu.wpi.first.wpilibj.Timer;
-import org.usfirst.frc.team2791.commands.AutoLineUpShot;
 
 import static org.usfirst.frc.team2791.robot.Robot.*;
 
@@ -13,10 +12,9 @@ import static org.usfirst.frc.team2791.robot.Robot.*;
  */
 public class VisionLineupWithSearch extends AutonMode {
     private double firstDistance;
-    private double multiplier = -1;
+    private double multiplier = -1.25;//This is how much the search angle increases by if no target is found
     private double angle = 30;
     private Timer visionLineUpTimer;
-    private double angleTurnAccum = 0;
 
     public VisionLineupWithSearch(double distance, double turnAngle) {
         firstDistance = distance;
@@ -55,11 +53,11 @@ public class VisionLineupWithSearch extends AutonMode {
                 state++;
                 break;
             case 4:
-                if (camera.getTarget() == null && !AutoLineUpShot.isRunning() && visionLineUpTimer.get() < 1) {
+                if (camera.getTarget() == null && !visionShot.isRunning() && visionLineUpTimer.get() < 1) {
                     //That means that autolineup probably ran too quickly so do a quick turn
                     //to scan nearby
                     state++;
-                } else if (!AutoLineUpShot.isRunning()) {
+                } else if (!visionShot.isRunning()) {
                     state = 7;
                     System.out.println("Auto lineup is no longer running and finishing up");
                 }
@@ -67,17 +65,13 @@ public class VisionLineupWithSearch extends AutonMode {
             case 5:
                 //set the drive train to look rightward first then leftward
                 if (driveTrain.setAngle(angle *= multiplier, 0.65, false, true)) {
+                    visionLineUpTimer.reset();
+                    visionLineUpTimer.start();
                     state = 4;
-                    angleTurnAccum = angle;
                 }
                 break;
-            case 6:
-                //zero the angle
-                if (driveTrain.setAngle(-angleTurnAccum, 0.65, false, true))
-                    state++;
-                break;
             case 7:
-                if (driveTrain.setDistance(-firstDistance, 0, .65, false, true))
+                if (driveTrain.setDistance(-firstDistance, -angle, .65, false, true))
                     state++;
                 break;
             case 8:

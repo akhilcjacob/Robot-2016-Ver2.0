@@ -1,7 +1,5 @@
 package org.usfirst.frc.team2791.helpers.autonModes;
 
-import org.usfirst.frc.team2791.commands.AutoLineUpShot;
-
 import static org.usfirst.frc.team2791.robot.Robot.*;
 
 /**
@@ -60,7 +58,7 @@ public class AutoLineUpWithBackup extends AutonMode {
                 state++;
                 break;
             case 5:
-                if (!AutoLineUpShot.isRunning()) {
+                if (!visionShot.isRunning()) {
                     state++;
                     System.out.println("Auto lineup is no longer running and finishing up");
                 }

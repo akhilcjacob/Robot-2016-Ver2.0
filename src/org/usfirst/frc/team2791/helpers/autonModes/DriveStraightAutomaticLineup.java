@@ -1,7 +1,5 @@
 package org.usfirst.frc.team2791.helpers.autonModes;
 
-import org.usfirst.frc.team2791.commands.AutoLineUpShot;
-
 import static org.usfirst.frc.team2791.robot.Robot.*;
 
 /**
@@ -28,6 +26,7 @@ public class DriveStraightAutomaticLineup extends AutonMode {
                 System.out.println("Starting the drive straight autoLinup ");
                 driveTrain.resetEncoders();
                 intake.extendIntake();
+                shooterArm.setMiddle();
                 state++;
                 break;
             case 2:
@@ -35,13 +34,7 @@ public class DriveStraightAutomaticLineup extends AutonMode {
                     // intake.setArmAttachmentDown();
                     System.out.println("Drove the first distance");
                     driveTrain.resetEncoders();
-                    shooterArm.setMiddle();
-                    //wait .3 seconds before continuing to give arm some time to move to location
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    shooterWheels.shooterArmMoving();
                     state++;
                 }
                 break;
@@ -61,7 +54,7 @@ public class DriveStraightAutomaticLineup extends AutonMode {
                 state++;
                 break;
             case 5:
-                if (!AutoLineUpShot.isRunning()) {
+                if (!visionShot.isRunning()) {
                     state++;
                     System.out.println("Auto lineup is no longer running and finishing up");
                 }

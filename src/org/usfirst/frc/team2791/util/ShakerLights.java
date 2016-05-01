@@ -1,7 +1,6 @@
 package org.usfirst.frc.team2791.util;
 
 import edu.wpi.first.wpilibj.DigitalOutput;
-import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Created by Akhil on 4/27/2016.
@@ -10,9 +9,9 @@ import edu.wpi.first.wpilibj.Timer;
 public class ShakerLights implements Runnable {
     private DigitalOutput PortA;
     private DigitalOutput PortB;
-    private boolean hasBall = false;
-    private boolean preppingShot = false;
-    private boolean shooting = false;
+    private boolean solidGreen = false;
+    private boolean yellowPulse = false;
+    private boolean greenPulse = false;
 
 
     public ShakerLights() {
@@ -25,24 +24,19 @@ public class ShakerLights implements Runnable {
     public void run() {
         while (true) {
             try {
-                if (hasBall) {
-                    Timer temp = new Timer();
-                    temp.start();
-                    while (temp.get() < 2) {
-                        PortA.set(true);
-                        PortB.set(true);
-                    }
-                    hasBall = false;
+                if (solidGreen) {
+                    PortA.set(true);
+                    PortB.set(true);
                 }
-                if (preppingShot) {
+                if (yellowPulse) {
                     PortA.set(true);
                     PortB.set(false);
                 }
-                if (shooting) {
+                if (greenPulse) {
                     PortA.set(false);
                     PortB.set(true);
                 }
-                if (!(hasBall || preppingShot || shooting)) {
+                if (!(solidGreen || yellowPulse || greenPulse)) {
                     PortA.set(false);
                     PortB.set(false);
                 }
@@ -54,15 +48,30 @@ public class ShakerLights implements Runnable {
         }
     }
 
-    public void setHasBall(boolean hasBall) {
-        this.hasBall = hasBall;
+    /**
+     * this turns the entire shooter arm solid green
+     *
+     * @param state this is the flag that decides true or false
+     */
+    public void setSolidGreen(boolean state) {
+        this.solidGreen = state;
     }
 
-    public void setPreppingShot(boolean preppingShot) {
-        this.preppingShot = preppingShot;
+    /**
+     * This will pulse leds in yellow color from bottom to top(shooter)
+     *
+     * @param pulse this flag deicdes whehter to pulse or not
+     */
+    public void setYellowPulse(boolean pulse) {
+        this.yellowPulse = pulse;
     }
 
-    public void setShooting(boolean shooting) {
-        this.shooting = shooting;
+    /**
+     * This will pulse leds in green color from bottom to top
+     *
+     * @param pulse this flag controls whether to pulse or not
+     */
+    public void setGreenPulse(boolean pulse) {
+        this.greenPulse = pulse;
     }
 }

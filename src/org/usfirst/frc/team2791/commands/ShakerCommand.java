@@ -11,7 +11,7 @@ public abstract class ShakerCommand {// template class for commands
     protected static int counter;
 
     //returns whether the class is running
-    static boolean isRunning() {
+    public boolean isRunning() {
         return running;
     }
 

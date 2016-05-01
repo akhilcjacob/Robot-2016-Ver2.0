@@ -88,8 +88,8 @@ public class TeleopHelper extends ShakerHelper {
             // Run intake inward with assistance of the shooter wheel
             shooterWheels.setToggledShooterSpeeds(-0.6, false);
             intake.pullBall();
-            //if the shooter has the ball it will set the lights to flash for 2 seconds
-            lights.setHasBall(shooterWheels.hasBall());
+            //if the shooter has the ball it will set the lights to flash
+            lights.setSolidGreen(shooterWheels.hasBall());
         } else if (operatorJoystick.getButtonX()) {
             // Run reverse if button pressed
             shooterWheels.setToggledShooterSpeeds(0.6, false);
@@ -129,8 +129,8 @@ public class TeleopHelper extends ShakerHelper {
     }
 
     private void lightController() {
-        lights.setPreppingShot(shooterWheels.getIfPreppingShot());
-        lights.setShooting(shooterWheels.getIfCompleteShot());
+        lights.setYellowPulse(visionShot.isRunning());
+        lights.setGreenPulse(shooterWheels.getIfCompleteShot());
     }
 
     private void compressorController() {

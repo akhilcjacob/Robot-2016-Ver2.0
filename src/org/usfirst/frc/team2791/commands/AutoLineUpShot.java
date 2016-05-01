@@ -43,16 +43,6 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
         totalTime = new Timer();
     }
 
-    /**************
-     * End Internal run methods
-     ****************/
-    public static boolean isRunning() {
-        return running;
-    }
-
-    /***
-     * INTERNAL RUN METHODS
-     ****/
 
     public void run() {
         while (running) {
@@ -155,6 +145,9 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
             }
         }
     }
+    /***
+     * INTERNAL RUN METHODS
+     ****/
 
     /**
      * Through threading this method tells the camera thread to get
@@ -196,6 +189,11 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
                 + " Shooter offset is: " + shootOffset);
 
     }
+
+    /**************
+     * End Internal run methods
+     ****************/
+
 
     public void setUseMultipleFrames(boolean value) {
         //This will use multiple frames to lineup and fire
