@@ -7,6 +7,7 @@ Created by Akhil Jacob(akhilcjacob@gmail.com)
 ------------------------------------------------------------
 CONTROLS:
 Driver:
+   
     GTA control(Default, Recommended): RT - forward, LT - Backward, LS(x axis) - spin
     Arcade control(bug in code, no one uses so no one ever fixed it): LS - forward, RS - spin
     Single Arcade control(bug in code, no one uses so no one ever fixed it): LS - forward(Y Axis)/spin(X axis)
@@ -17,6 +18,7 @@ Driver:
 
     Notes: vision shot will be canceled if the driver touches trys to move the driveTrain
 Operator:
+   
     Start Button: cancel shooter pids, and vision shots
     Select Button: switch between vision tracking mode and regular mode on the camera(defaults on vision tracking)
 
@@ -38,6 +40,7 @@ Operator:
     Axis LT: Run shooter wheels inward
 -------------------------------------------------------------------------------------
 Side Notes:
+    
     -After a shot the shooter arm will drop this is used when in competition to be ready for the next shot right
         away
     -Once again, an attempt to move the drive train while vision shot is running will cause the vision shot to end
