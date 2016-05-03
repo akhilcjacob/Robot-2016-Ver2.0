@@ -16,7 +16,6 @@ public class ShakerIntake extends AbstractShakerIntake {
         leftIntakeMotor = new Talon(Constants.INTAKE_TALON_LEFT_PORT);
         rightIntakeMotor = new Talon(Constants.INTAKE_TALON_RIGHT_PORT);
         intakeSolenoid = new Solenoid(Constants.PCM_MODULE, Constants.INTAKE_PISTON);
-        armAttachment = new Solenoid(Constants.PCM_MODULE,Constants.FUN_BRIDGE_ARM_PORT);
         init();
     }
 
@@ -40,21 +39,6 @@ public class ShakerIntake extends AbstractShakerIntake {
             return IntakeState.EXTENDED;
         else
             return IntakeState.EXTENDED;
-    }
-
-    public void setArmAttachmentUp() {
-//    	System.out.println("I moving the little flipper up");
-        armAttachment.set(false);
-    }
-
-    public void setArmAttachmentDown() {
-//    	System.out.println("I moving the little flipper down");
-        armAttachment.set(true);
-    }
-
-
-    public boolean getArmAttachementUp() {
-        return !armAttachment.get();
     }
 
     public void run() {
