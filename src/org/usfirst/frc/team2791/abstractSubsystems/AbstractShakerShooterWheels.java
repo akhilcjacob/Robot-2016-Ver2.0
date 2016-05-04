@@ -97,23 +97,24 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
         while (true) {
             if (shooterArmMoving) {
                 internalShooterArmMoving();
-                shooterArmMoving = false;
                 stopMotors();
+                shooterArmMoving = false;
+                if (prepShotAfterShooterArm)
+                    prepShot = true;
             }
+            //this continues to update the fact that the shooter is busy
             busy = prepShot || completeShot;
             double setPoint = internalGetSetPoint();
             if (prepShot) {
                 internalPrepShot(setPoint);
-                prepShotAfterShooterArm = false;
-                cancelShot = false;
             }
             if (completeShot) {
                 internalAutoFire(setPoint);
-                resetShooterFlags();
                 stopMotors();
                 //TODO look at possibly doing this but make sure to remove this out of the vision shot code if so
 //                IntakeAndShooterSynergy.setPosition(AbstractShakerShooterArm.ShooterHeight.LOW);
             }
+            internalReset();
 
         }
     }
@@ -121,6 +122,14 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
     /**
      * These methods are only to be used by the run method!!
      */
+    private void internalReset() {
+        shooterArmMoving = false;
+        completeShot = false;
+        cancelShot = false;
+        prepShotAfterShooterArm = false;
+        busy = false;
+    }
+
     private void internalShooterArmMoving() {
         //if the shooter arm is moving then run the wheels inward
         Timer tempTimer = new Timer();
@@ -130,13 +139,7 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
         while (tempTimer.get() < 0.4) {
             setToggledShooterSpeeds(-0.7, false);
             //if shooter is busy break out of this b/c it isnt as important
-            if (busy)
-                break;
         }
-        stopMotors();
-        shooterArmMoving = false;
-        if (prepShotAfterShooterArm)
-            prepShot = true;
     }
 
     private double internalGetSetPoint() {
@@ -225,6 +228,7 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
      */
     public void resetShooterFlags() {
         //set all the run method flags to false
+        busy = false;
         overrideShot = false;
         prepShot = false;
         cancelShot = true;
@@ -249,7 +253,7 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
 
     public void shooterArmMoving() {
         //this flag runs the wheels inward so it sucks the ball in
-        shooterArmMoving = true;
+        shooterArmMoving = busy = true;
     }
 
     /**
@@ -292,8 +296,9 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
      */
     public void setShooterSpeeds(double targetSpeed, boolean withPID) {
         if (withPID) {
-            // if pid should be used then we have to switch the talons to
-            // velocity mode
+            //using PID will supercede all other attmepts to control the wheels
+            busy = true;
+            //Switch to velocity control mode
             leftShooterTalon.changeControlMode(CANTalon.TalonControlMode.Speed);
             rightShooterTalon.changeControlMode(CANTalon.TalonControlMode.Speed);
             // update the pid and feedforward values
