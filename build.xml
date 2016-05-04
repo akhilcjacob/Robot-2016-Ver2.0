@@ -2,10 +2,13 @@
 
 <project name="FRC Deployment" default="deploy">
 
-    <!-- The following properties can be defined to override system level settings.
-        These should not be touched unless you know what you're doing. The primary
-        use is to override the wpilib version when working with older robots that
-        can't compile with the latest libraries. -->
+    <!--
+    The following properties can be defined to override system level
+    settings. These should not be touched unless you know what you're
+    doing. The primary use is to override the wpilib version when
+    working with older robots that can't compile with the latest
+    libraries.
+    -->
 
     <!-- By default the system version of WPI is used -->
     <!-- <property name="version" value=""/> -->
@@ -24,4 +27,4 @@
 
     <import file="${wpilib.ant.dir}/build.xml"/>
 
-</project> 
+</project>
