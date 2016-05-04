@@ -3,5 +3,5 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/NetworkTables-sources"/>
-	<classpathentry kind="output" path="/production/Robot_2016_Ver2.0.1"/>
+	<classpathentry kind="output" path="production/Robot_2016_Ver2.0.1"/>
 </classpath>
