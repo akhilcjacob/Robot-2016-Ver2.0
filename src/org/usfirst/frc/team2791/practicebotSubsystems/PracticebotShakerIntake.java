@@ -6,7 +6,7 @@ import org.usfirst.frc.team2791.abstractSubsystems.AbstractShakerIntake;
 
 public class PracticebotShakerIntake extends AbstractShakerIntake {
     private DoubleSolenoid intakeSolenoid;
- 
+
     public PracticebotShakerIntake() {
         // init
         super();

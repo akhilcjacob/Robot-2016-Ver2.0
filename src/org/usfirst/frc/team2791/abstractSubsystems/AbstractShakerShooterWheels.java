@@ -41,7 +41,6 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
     private boolean busy = false;
     //completeShot timer
 
-
     public AbstractShakerShooterWheels() {
         System.out.println("New instance of shooterWheels created.");
     }

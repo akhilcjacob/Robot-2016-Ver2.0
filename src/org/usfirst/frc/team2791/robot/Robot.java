@@ -47,11 +47,11 @@ public class Robot extends IterativeRobot {
     public static Thread cameraThread;
     public static Thread driveTrainThread;
     public static Thread AutoLineUpThread;
+    //LIGHTS!!!!!!!!!
+    public static ShakerLights lights;
     // helpers
     private TeleopHelper teleopHelper;
     private AutonHelper autonHelper;
-    //LIGHTS!!!!!!!!!
-    public static ShakerLights lights;
 
     // MAIN ROBOT CODE
     public void robotInit() {

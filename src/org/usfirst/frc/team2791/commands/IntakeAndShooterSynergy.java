@@ -48,14 +48,13 @@ public class IntakeAndShooterSynergy {
 
 
         if (position != null && shooterArm.getShooterHeight().equals(position)) {
-            if (shooterArm.getIfShooterMiddle()) {
-                //do nothing because u dont want the intake to go up
-            } else {
+            //see if the arm has been set to the middle b/c u dont want intake to go up then
+            if (!shooterArm.getIfShooterMiddle()) {
                 //resets the postion variable
                 position = null;
                 //This breaks out of any holds it is in and then retracts the intake
                 intake.retractIntake(false);
-            }
+            } else position = null;
         }
 
         if (operatorJoystick.getDpadLeft()) {
@@ -80,5 +79,4 @@ public class IntakeAndShooterSynergy {
             position = height;
         }
     }
-
 }
