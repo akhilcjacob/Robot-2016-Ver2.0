@@ -74,7 +74,11 @@ public class IntakeAndShooterSynergy {
     }
 
     public static void setPosition(ShooterHeight height) {
-        position = height;
+        //Check to make sure that the new height is not the same as the current height
+        if (!shooterArm.getSolenoidState().equals(height)) {
+            intake.extendIntake(true);
+            position = height;
+        }
     }
 
 }

@@ -20,6 +20,12 @@ public abstract class AbstractShakerShooterArm extends ShakerSubsystem {
 
     public abstract void setChevalArm(boolean down);
 
+    /**
+     * This gets the state of the actuall state of the solenoid, so basically
+     * what the target setpoint is.
+     *
+     * @return solenoid state in form of enum ShooterHeight
+     */
     public abstract ShooterHeight getSolenoidState();
 
     protected abstract void moveShooterPistonsLow();
