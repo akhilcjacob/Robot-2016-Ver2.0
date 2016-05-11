@@ -34,8 +34,10 @@ public class Constants {
     // PWM PORTS
     public static final int DRIVE_TALON_LEFT_PORT_FRONT = 5;
     public static final int DRIVE_TALON_LEFT_PORT_BACK = 4;
+    public static final int DRIVE_TALON_LEFT_PORT_C = 7;
     public static final int DRIVE_TALON_RIGHT_PORT_FRONT = 2;
     public static final int DRIVE_TALON_RIGHT_PORT_BACK = 3;
+    public static final int DRIVE_TALON_RIGHT_PORT_C = 0;
     public static final int INTAKE_TALON_LEFT_PORT = 6;
     public static final int INTAKE_TALON_RIGHT_PORT = 1;
     public static final int BALL_AID_SERVO_PORT = 9;
