@@ -24,6 +24,7 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
     protected CANTalon rightShooterTalon;
     //servo that pushes the ball into the shooter wheels
     protected Servo servo;
+    protected Servo clampServo;
     //Analog distance sensor used to determine if shooter has ball
     protected AnalogInput distanceSensor;
     //PID Values
@@ -100,6 +101,7 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
                 shooterArmMoving = false;
                 if (prepShotAfterShooterArm)
                     prepShot = true;
+                clampBall();
             }
             //this continues to update the fact that the shooter is busy
             busy = prepShot || completeShot;
@@ -108,6 +110,7 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
                 internalPrepShot(setPoint);
             }
             if (completeShot) {
+            	releaseBall();
                 internalAutoFire(setPoint);
                 stopMotors();
                 //TODO look at possibly doing this but make sure to remove this out of the vision shot code if so
@@ -362,7 +365,12 @@ public class AbstractShakerShooterWheels extends ShakerSubsystem implements Runn
         // bring servo back to original position
         servo.set(1);
     }
-
+    public void clampBall(){
+    	clampServo.set(0);
+    }
+    public void releaseBall(){
+    	clampServo.set(1);
+    }
     /*
      * Methods from ShakerSubsystem
      */

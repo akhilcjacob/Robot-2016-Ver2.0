@@ -27,6 +27,7 @@ public class IntakeAndShooterSynergy {
             if (operatorJoystick.getDpadDown() || position == ShooterHeight.LOW) {
                 shooterArm.setLow();
                 shooterWheels.resetShooterFlags();
+                shooterWheels.releaseBall();
             }
         } else if (!intake.getIfExtended()) {
             //if the intake is retracted and shooter arm is not moving the run other controls

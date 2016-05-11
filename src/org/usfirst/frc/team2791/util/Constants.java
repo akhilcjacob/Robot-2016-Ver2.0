@@ -25,6 +25,7 @@ public class Constants {
     // INTAKE CONSTANTS
     // ANALOG
     public static final int BALL_DISTANCE_SENSOR_PORT = 0;
+    public static final int CLAMPING_SERVO_PORT = 1;
     // DIO
     public static final int LEFT_DRIVE_ENCODER_PORT_A = 3;
     public static final int LEFT_DRIVE_ENCODER_PORT_B = 2;

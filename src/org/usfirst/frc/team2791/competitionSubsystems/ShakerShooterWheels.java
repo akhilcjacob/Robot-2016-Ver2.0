@@ -17,6 +17,7 @@ public class ShakerShooterWheels extends AbstractShakerShooterWheels {
         leftShooterTalon = new CANTalon(Constants.SHOOTER_TALON_LEFT_PORT);
         rightShooterTalon = new CANTalon(Constants.SHOOTER_TALON_RIGHT_PORT);
         servo = new Servo(Constants.BALL_AID_SERVO_PORT);
+        clampServo = new Servo(Constants.CLAMPING_SERVO_PORT);
         distanceSensor = new AnalogInput(Constants.BALL_DISTANCE_SENSOR_PORT);
         init();
     }

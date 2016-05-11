@@ -87,6 +87,7 @@ public class TeleopHelper extends ShakerHelper {
         if (operatorJoystick.getButtonB()) {
             // Run intake inward with assistance of the shooter wheel
             shooterWheels.setToggledShooterSpeeds(-0.6, false);
+            shooterWheels.releaseBall();
             intake.pullBall();
             //if the shooter has the ball it will set the lights to flash
             lights.setSolidGreen(shooterWheels.hasBall());
