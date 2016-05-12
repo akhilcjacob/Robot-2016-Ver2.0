@@ -25,7 +25,7 @@ public class AutoLineUpShot extends ShakerCommand implements Runnable {
     private static final int AFTER_SHOT_CLEANUP = 4;
     //reset for anything than ran
     private static final int GENERAL_RESET = 5;
-    private static final double angleMaxOutput = 0.6;
+    private static final double angleMaxOutput = 0.7;
     //Settings
     // to correct any curving of the shot leftward or right ward
     public static double shootOffset = 0.5;
