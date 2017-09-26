@@ -2,8 +2,7 @@
 Team 2791 2016 Robot Code
 -----------------------------------------------------------
 This is the rework code for FRC Team 2791, Shaker Robotics
-It is NOWHERE NEAR COMPLETE SO BEWARE!!!!!!!!
-Created by Akhil Jacob(akhilcjacob@gmail.com)
+Created by Akhil Jacob(akhilcjacob.public@gmail.com)
 ------------------------------------------------------------
 CONTROLS:
 Driver:
